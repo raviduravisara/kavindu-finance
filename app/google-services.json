@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "885685393954",
+    "project_id": "kavindu-finance",
+    "storage_bucket": "kavindu-finance.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:885685393954:android:9b41f9f47c0646b4e9c87b",
+        "android_client_info": {
+          "package_name": "com.fintrack.kavindu"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "885685393954-qj370ftdvgvcki94vijjnl5vd8mutohi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fintrack.kavindu",
+            "certificate_hash": "2ed566d90e7e75b39a6228dd8db4353df063c3af"
+          }
+        },
+        {
+          "client_id": "885685393954-tognk8npumlncq5ggij21q1gonc8c7nj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAwmAWIBfsU__O09w9UpwEz3ThGvp33MHc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "885685393954-tognk8npumlncq5ggij21q1gonc8c7nj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
