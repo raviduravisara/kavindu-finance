@@ -15,11 +15,11 @@ fun AppNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Home,
+        startDestination = Dashboard,
         modifier = modifier,
     ) {
-        // Placeholder until the first real screen exists.
-        composable<Home> {
+        // Placeholder until the real dashboard screen exists. The login check comes with M1.
+        composable<Dashboard> {
             Greeting(name = "Android")
         }
     }
