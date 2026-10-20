@@ -1,5 +1,6 @@
 package com.fintrack.kavindu.core.data.repository
 
+import com.fintrack.kavindu.core.data.local.AppDatabase
 import com.fintrack.kavindu.core.data.remote.FirestorePaths
 import com.fintrack.kavindu.core.model.AuthError
 import com.fintrack.kavindu.core.model.AuthException
@@ -16,10 +17,12 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,6 +30,7 @@ import javax.inject.Singleton
 class AuthRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
+    private val database: AppDatabase,
 ) : AuthRepository {
 
     // Set only after the user's profile exists, so the app never opens for a user without one.
@@ -50,9 +54,10 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun logout() {
-        // Clearing Room is added with the Room task.
         auth.signOut()
         _currentUserId.value = null
+        // Room holds a copy of this user's data; clear it so the next user cannot see it.
+        withContext(Dispatchers.IO) { database.clearAllTables() }
     }
 
     // The profile is created on first register. Login checks again, in case that first write failed.
