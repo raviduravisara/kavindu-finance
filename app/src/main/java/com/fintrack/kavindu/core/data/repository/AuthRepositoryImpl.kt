@@ -2,6 +2,7 @@ package com.fintrack.kavindu.core.data.repository
 
 import com.fintrack.kavindu.core.data.local.AppDatabase
 import com.fintrack.kavindu.core.data.remote.FirestorePaths
+import com.fintrack.kavindu.core.data.remote.FirestoreSync
 import com.fintrack.kavindu.core.model.AuthError
 import com.fintrack.kavindu.core.model.AuthException
 import com.fintrack.kavindu.core.model.Currency
@@ -31,11 +32,17 @@ class AuthRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
     private val database: AppDatabase,
+    private val firestoreSync: FirestoreSync,
 ) : AuthRepository {
 
     // Set only after the user's profile exists, so the app never opens for a user without one.
     private val _currentUserId = MutableStateFlow(auth.currentUser?.uid)
     override val currentUserId: StateFlow<String?> = _currentUserId.asStateFlow()
+
+    init {
+        // Still signed in from last time: start copying their data into Room straight away.
+        auth.currentUser?.uid?.let(firestoreSync::start)
+    }
 
     override suspend fun register(email: String, password: String): Result<Unit> = runAuthCall {
         val user = auth.createUserWithEmailAndPassword(email, password).await().user
@@ -54,6 +61,7 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun logout() {
+        firestoreSync.stop() // no listener may write into Room after it is cleared
         auth.signOut()
         _currentUserId.value = null
         // Room holds a copy of this user's data; clear it so the next user cannot see it.
@@ -68,6 +76,7 @@ class AuthRepositoryImpl @Inject constructor(
             auth.signOut() // never leave a signed-in user without a profile
             throw e
         }
+        firestoreSync.start(uid)
         _currentUserId.value = uid
     }
 

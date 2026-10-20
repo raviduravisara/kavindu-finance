@@ -11,7 +11,7 @@ interface ExpenseRepository {
     /** Used by the goal and the balance check. */
     fun observeExpensesSince(date: LocalDate): Flow<List<Expense>>
 
-    /** Adds, edits, or undoes a delete (saving the same expense again with the same id). */
+    /** Adds (blank id), edits, or undoes a delete (saving the same expense again with the same id). */
     suspend fun saveExpense(expense: Expense): Result<Unit>
 
     suspend fun deleteExpense(id: String): Result<Unit>
