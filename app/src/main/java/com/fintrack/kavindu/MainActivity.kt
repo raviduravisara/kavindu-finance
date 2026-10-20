@@ -11,8 +11,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.fintrack.kavindu.core.ui.theme.KavinduFinanceTheme
 import com.fintrack.kavindu.navigation.AppNavHost
-import com.fintrack.kavindu.ui.theme.KavinduFinanceTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
