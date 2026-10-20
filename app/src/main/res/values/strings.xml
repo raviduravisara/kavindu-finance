@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Kavindu Finance</string>
+
+    <!-- Shared screen states (core/ui/components) -->
+    <string name="state_loading">Loading</string>
+    <string name="action_try_again">Try again</string>
 </resources>
