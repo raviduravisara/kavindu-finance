@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fintrack.kavindu.R
+import com.fintrack.kavindu.core.ui.theme.Dimens
 import com.fintrack.kavindu.core.ui.theme.KavinduFinanceTheme
 
 /**
@@ -33,7 +34,7 @@ fun ErrorState(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(Dimens.ScreenPadding),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

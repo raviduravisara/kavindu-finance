@@ -7,15 +7,15 @@ import org.junit.Test
 class MoneyTest {
 
     @Test
-    fun formatLkr_addsThousandSeparatorsAndTwoDecimals() {
+    fun formatLkr_addsThousandSeparators_andDecimalsOnlyWhenThereAreCents() {
         assertEquals("LKR 1,250.50", Money.formatLkr(125050))
-        assertEquals("LKR 490,000.00", Money.formatLkr(49000000))
-        assertEquals("LKR 1,000,000,000.00", Money.formatLkr(100000000000))
+        assertEquals("LKR 490,000", Money.formatLkr(49000000))
+        assertEquals("LKR 1,000,000,000", Money.formatLkr(100000000000))
     }
 
     @Test
     fun formatLkr_smallAmounts() {
-        assertEquals("LKR 0.00", Money.formatLkr(0))
+        assertEquals("LKR 0", Money.formatLkr(0))
         assertEquals("LKR 0.05", Money.formatLkr(5))
         assertEquals("LKR 999.99", Money.formatLkr(99999))
     }
@@ -51,6 +51,6 @@ class MoneyTest {
     @Test
     fun parseThenFormat_givesTheSameAmountBack() {
         val cents = Money.parseToCents("490000")!!
-        assertEquals("LKR 490,000.00", Money.formatLkr(cents))
+        assertEquals("LKR 490,000", Money.formatLkr(cents))
     }
 }

@@ -58,7 +58,7 @@ fun AppNavHost(
             // Placeholder until Member 3's dashboard exists; the real dashboard links to Settings the same way.
             composable<Dashboard> {
                 EmptyState(
-                    title = stringResource(R.string.placeholder_dashboard),
+                    message = stringResource(R.string.placeholder_dashboard),
                     actionLabel = stringResource(R.string.action_settings),
                     onAction = { navController.navigate(Settings) },
                 )
