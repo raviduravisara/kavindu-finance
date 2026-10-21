@@ -39,6 +39,7 @@ import com.fintrack.kavindu.feature.settings.viewmodel.SettingsViewModel
 @Composable
 fun SettingsScreen(
     onBackClicked: () -> Unit,
+    onBalanceCheckClicked: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -48,6 +49,7 @@ fun SettingsScreen(
         SettingsContent(
             uiState = uiState,
             onBackClicked = onBackClicked,
+            onBalanceCheckClicked = onBalanceCheckClicked,
             onStartDaySelected = viewModel::onStartDaySelected,
             onLogoutClicked = viewModel::onLogoutClicked,
             onLogoutConfirmed = viewModel::onLogoutConfirmed,
@@ -60,6 +62,7 @@ fun SettingsScreen(
 private fun SettingsContent(
     uiState: SettingsUiState,
     onBackClicked: () -> Unit,
+    onBalanceCheckClicked: () -> Unit,
     onStartDaySelected: (Int) -> Unit,
     onLogoutClicked: () -> Unit,
     onLogoutConfirmed: () -> Unit,
@@ -107,6 +110,11 @@ private fun SettingsContent(
                 color = MaterialTheme.colorScheme.error,
             )
             null -> Unit
+        }
+
+        SectionTitle(stringResource(R.string.settings_balance_section))
+        OutlinedButton(onClick = onBalanceCheckClicked, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(R.string.settings_balance_button))
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -174,6 +182,7 @@ private fun SettingsPreview() {
                 cycleEnd = "24 Oct",
             ),
             onBackClicked = {},
+            onBalanceCheckClicked = {},
             onStartDaySelected = {},
             onLogoutClicked = {},
             onLogoutConfirmed = {},

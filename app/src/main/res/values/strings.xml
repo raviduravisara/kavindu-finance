@@ -17,6 +17,31 @@
     <string name="error_sync_failed">Some of your data could not be loaded. It will try again when you reopen the app.</string>
     <string name="error_unknown">Something went wrong. Please try again.</string>
 
+    <!-- Weekly balance check (feature/balancecheck) -->
+    <string name="balance_title">Weekly balance check</string>
+    <string name="balance_intro">Once a week, enter what you actually have. The app works out anything that was not recorded, so you never need to track every small spend.</string>
+    <string name="balance_first_title">Set your starting point</string>
+    <string name="balance_first_text">Enter today\'s balances. Next time, the app compares against these.</string>
+    <string name="balance_last_check">Last check: %1$s · %2$s</string>
+    <string name="balance_bank_label">Bank balance (all accounts)</string>
+    <string name="balance_wallet_label">Cash in wallet</string>
+    <string name="balance_currency_prefix">LKR </string>
+    <string name="balance_invalid_amount">Enter amounts like 152000 or 152000.50.</string>
+    <string name="balance_save_starting_point">Save starting point</string>
+    <string name="balance_check_button">Check</string>
+    <string name="balance_expected">Expected</string>
+    <string name="balance_actual">You have</string>
+    <string name="balance_difference">Difference</string>
+    <string name="balance_matches">Everything matches your records.</string>
+    <string name="balance_unrecorded">%1$s is not in your records. It will be saved as one \"unrecorded spending\" entry, so your totals stay right.</string>
+    <string name="balance_extra">You have %1$s more than your records show. Add it as income?</string>
+    <string name="balance_save_check">Save check</string>
+    <string name="balance_add_income">Add as income</string>
+    <string name="balance_ignore">Ignore</string>
+    <string name="balance_saved">Saved. See you next week.</string>
+    <string name="settings_balance_section">Weekly balance check</string>
+    <string name="settings_balance_button">Check my balance</string>
+
     <!-- Settings (feature/settings) -->
     <string name="settings_title">Settings</string>
     <string name="settings_account">Account</string>

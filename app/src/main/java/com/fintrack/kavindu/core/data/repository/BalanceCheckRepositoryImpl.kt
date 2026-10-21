@@ -8,6 +8,7 @@ import com.fintrack.kavindu.core.data.remote.documentFor
 import com.fintrack.kavindu.core.data.remote.toFirestoreMap
 import com.fintrack.kavindu.core.model.BalanceCheck
 import com.fintrack.kavindu.core.model.Expense
+import com.fintrack.kavindu.core.model.Income
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -22,16 +23,25 @@ class BalanceCheckRepositoryImpl @Inject constructor(
     override fun observeLatestCheck(): Flow<BalanceCheck?> =
         balanceCheckDao.observeLatest().map { it?.toModel() }
 
-    // The check and its "unrecorded spending" expense are saved together in one batch.
-    override suspend fun saveCheck(check: BalanceCheck, unrecordedSpending: Expense?): Result<Unit> = userFirestore.write {
+    // The check and its result entry are saved together in one batch, or not at all.
+    override suspend fun saveCheck(
+        check: BalanceCheck,
+        unrecordedSpending: Expense?,
+        foundIncome: Income?,
+    ): Result<Unit> = userFirestore.write {
         val batch = userFirestore.batch()
-        val checkRef = userFirestore.collection(FirestorePaths.BALANCE_CHECKS).documentFor(check.id)
         var savedCheck = check
         if (unrecordedSpending != null) {
             val expenseRef = userFirestore.collection(FirestorePaths.EXPENSES).documentFor(unrecordedSpending.id)
             batch.set(expenseRef, unrecordedSpending.toFirestoreMap())
-            savedCheck = check.copy(resultExpenseId = expenseRef.id)
+            savedCheck = savedCheck.copy(resultExpenseId = expenseRef.id)
         }
+        if (foundIncome != null) {
+            val incomeRef = userFirestore.collection(FirestorePaths.INCOMES).documentFor(foundIncome.id)
+            batch.set(incomeRef, foundIncome.toFirestoreMap())
+            savedCheck = savedCheck.copy(resultIncomeId = incomeRef.id)
+        }
+        val checkRef = userFirestore.collection(FirestorePaths.BALANCE_CHECKS).documentFor(check.id)
         batch.set(checkRef, savedCheck.toFirestoreMap())
         batch.commit()
     }
