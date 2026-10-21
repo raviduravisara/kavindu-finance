@@ -47,7 +47,8 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun register(email: String, password: String): Result<Unit> = runAuthCall {
         val user = auth.createUserWithEmailAndPassword(email, password).await().user
             ?: throw AuthException(AuthError.UNKNOWN)
-        finishSignIn(user.uid, email)
+        // Firebase's own copy of the email, exactly as the security rules see it.
+        finishSignIn(user.uid, user.email ?: email)
     }
 
     override suspend fun login(email: String, password: String): Result<Unit> = runAuthCall {
