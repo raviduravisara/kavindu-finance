@@ -88,6 +88,18 @@
     <string name="auth_error_too_many_attempts">Too many attempts. Wait a few minutes and try again.</string>
     <string name="auth_error_unknown">Something went wrong. Please try again.</string>
 
-    <!-- Temporary, until the real dashboard exists -->
-    <string name="placeholder_dashboard">You are logged in. The dashboard is coming soon.</string>
+    <!-- App frame: bottom navigation bar and dashboard top bar (UI spec) -->
+    <string name="nav_home">Home</string>
+    <string name="nav_income">Income</string>
+    <string name="nav_history">History</string>
+    <string name="nav_goal">Goal</string>
+    <string name="dashboard_title">This cycle</string>
+
+    <!-- Temporary placeholders until the real screens exist -->
+    <string name="placeholder_dashboard">The dashboard is coming soon.</string>
+    <string name="placeholder_dashboard_action">Start weekly check-in</string>
+    <string name="placeholder_income">Income is coming soon.</string>
+    <string name="placeholder_history">History is coming soon.</string>
+    <string name="placeholder_goal">Your savings goal is coming soon.</string>
+    <string name="placeholder_back_home">Back to Home</string>
 </resources>
