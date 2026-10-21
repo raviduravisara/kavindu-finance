@@ -5,7 +5,6 @@ import com.fintrack.kavindu.core.data.local.entity.toModel
 import com.fintrack.kavindu.core.data.remote.FirestorePaths
 import com.fintrack.kavindu.core.data.remote.UserFirestore
 import com.fintrack.kavindu.core.data.remote.documentFor
-import com.fintrack.kavindu.core.data.remote.firestoreWrite
 import com.fintrack.kavindu.core.data.remote.toFirestoreMap
 import com.fintrack.kavindu.core.model.Income
 import com.fintrack.kavindu.core.util.PayCycle
@@ -27,11 +26,11 @@ class IncomeRepositoryImpl @Inject constructor(
     override fun observeIncomesSince(date: LocalDate): Flow<List<Income>> =
         incomeDao.observeSince(date).map { rows -> rows.map { it.toModel() } }
 
-    override suspend fun saveIncome(income: Income): Result<Unit> = firestoreWrite {
+    override suspend fun saveIncome(income: Income): Result<Unit> = userFirestore.write {
         userFirestore.collection(FirestorePaths.INCOMES).documentFor(income.id).set(income.toFirestoreMap())
     }
 
-    override suspend fun deleteIncome(id: String): Result<Unit> = firestoreWrite {
+    override suspend fun deleteIncome(id: String): Result<Unit> = userFirestore.write {
         userFirestore.collection(FirestorePaths.INCOMES).document(id).delete()
     }
 }

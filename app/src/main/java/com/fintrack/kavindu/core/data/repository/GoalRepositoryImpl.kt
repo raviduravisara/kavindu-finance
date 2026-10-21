@@ -5,7 +5,6 @@ import com.fintrack.kavindu.core.data.local.entity.toModel
 import com.fintrack.kavindu.core.data.remote.FirestorePaths
 import com.fintrack.kavindu.core.data.remote.UserFirestore
 import com.fintrack.kavindu.core.data.remote.documentFor
-import com.fintrack.kavindu.core.data.remote.firestoreWrite
 import com.fintrack.kavindu.core.data.remote.toFirestoreMap
 import com.fintrack.kavindu.core.model.Goal
 import kotlinx.coroutines.flow.Flow
@@ -21,11 +20,11 @@ class GoalRepositoryImpl @Inject constructor(
 
     override fun observeGoal(): Flow<Goal?> = goalDao.observeGoal().map { it?.toModel() }
 
-    override suspend fun saveGoal(goal: Goal): Result<Unit> = firestoreWrite {
+    override suspend fun saveGoal(goal: Goal): Result<Unit> = userFirestore.write {
         userFirestore.collection(FirestorePaths.GOALS).documentFor(goal.id).set(goal.toFirestoreMap())
     }
 
-    override suspend fun deleteGoal(id: String): Result<Unit> = firestoreWrite {
+    override suspend fun deleteGoal(id: String): Result<Unit> = userFirestore.write {
         userFirestore.collection(FirestorePaths.GOALS).document(id).delete()
     }
 }

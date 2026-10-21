@@ -11,10 +11,13 @@ import com.fintrack.kavindu.core.data.local.dao.IncomeDao
 import com.fintrack.kavindu.core.data.local.dao.MilestoneDao
 import com.fintrack.kavindu.core.data.local.dao.ProfileDao
 import com.fintrack.kavindu.core.data.local.dao.RecurringItemDao
+import com.fintrack.kavindu.core.data.repository.ErrorRepositoryImpl
+import com.fintrack.kavindu.core.model.AppError
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -46,7 +49,13 @@ class FirestoreSync @Inject constructor(
     private val milestoneDao: MilestoneDao,
     private val cryptoTransferDao: CryptoTransferDao,
     private val balanceCheckDao: BalanceCheckDao,
+    private val errorRepository: ErrorRepositoryImpl,
 ) {
+    // A failed Room write must never crash the app: log it and show the user a calm message instead.
+    private val crashGuard = CoroutineExceptionHandler { _, error ->
+        Log.w(TAG, "Copying data into Room failed", error)
+        errorRepository.report(AppError.SYNC_FAILED)
+    }
     private var syncJob: Job? = null
     private var syncedUid: String? = null
 
@@ -56,7 +65,7 @@ class FirestoreSync @Inject constructor(
         syncJob?.cancel()
 
         val job = SupervisorJob()
-        val scope = CoroutineScope(Dispatchers.IO + job)
+        val scope = CoroutineScope(Dispatchers.IO + job + crashGuard)
         syncJob = job
         syncedUid = uid
 
@@ -104,6 +113,7 @@ class FirestoreSync @Inject constructor(
             val registration = addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     Log.w(TAG, "Listener stopped for $path", error)
+                    errorRepository.report(AppError.SYNC_FAILED)
                     return@addSnapshotListener
                 }
                 if (snapshot != null) trySend(snapshot.documents.mapNotNull(toEntity))
@@ -116,6 +126,7 @@ class FirestoreSync @Inject constructor(
             val registration = addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     Log.w(TAG, "Listener stopped for $path", error)
+                    errorRepository.report(AppError.SYNC_FAILED)
                     return@addSnapshotListener
                 }
                 trySend(snapshot?.takeIf { it.exists() })

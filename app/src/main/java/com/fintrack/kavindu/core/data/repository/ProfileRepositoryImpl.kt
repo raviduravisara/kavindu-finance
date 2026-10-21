@@ -3,7 +3,8 @@ package com.fintrack.kavindu.core.data.repository
 import com.fintrack.kavindu.core.data.local.dao.ProfileDao
 import com.fintrack.kavindu.core.data.local.entity.toModel
 import com.fintrack.kavindu.core.data.remote.UserFirestore
-import com.fintrack.kavindu.core.data.remote.firestoreWrite
+import com.fintrack.kavindu.core.model.AppError
+import com.fintrack.kavindu.core.model.AppException
 import com.fintrack.kavindu.core.model.UserProfile
 import com.fintrack.kavindu.core.util.PayCycle
 import kotlinx.coroutines.flow.Flow
@@ -21,14 +22,12 @@ class ProfileRepositoryImpl @Inject constructor(
         profileDao.observeProfile().map { it?.toModel() }
 
     override suspend fun updateCycleStartDay(day: Int): Result<Unit> {
-        if (!PayCycle.isValidStartDay(day)) {
-            return Result.failure(IllegalArgumentException("Start day must be between 1 and 28"))
-        }
-        return firestoreWrite { userFirestore.userDocument().update("cycleStartDay", day) }
+        if (!PayCycle.isValidStartDay(day)) return Result.failure(AppException(AppError.INVALID_DATA))
+        return userFirestore.write { userFirestore.userDocument().update("cycleStartDay", day) }
     }
 
     override suspend fun updateLastChannelAndAccount(channel: String, account: String): Result<Unit> =
-        firestoreWrite {
+        userFirestore.write {
             userFirestore.userDocument().update(mapOf("lastChannel" to channel, "lastAccount" to account))
         }
 }

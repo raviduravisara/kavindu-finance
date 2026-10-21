@@ -5,7 +5,6 @@ import com.fintrack.kavindu.core.data.local.entity.toModel
 import com.fintrack.kavindu.core.data.remote.FirestorePaths
 import com.fintrack.kavindu.core.data.remote.UserFirestore
 import com.fintrack.kavindu.core.data.remote.documentFor
-import com.fintrack.kavindu.core.data.remote.firestoreWrite
 import com.fintrack.kavindu.core.data.remote.toFirestoreMap
 import com.fintrack.kavindu.core.model.BalanceCheck
 import com.fintrack.kavindu.core.model.Expense
@@ -24,7 +23,7 @@ class BalanceCheckRepositoryImpl @Inject constructor(
         balanceCheckDao.observeLatest().map { it?.toModel() }
 
     // The check and its "unrecorded spending" expense are saved together in one batch.
-    override suspend fun saveCheck(check: BalanceCheck, unrecordedSpending: Expense?): Result<Unit> = firestoreWrite {
+    override suspend fun saveCheck(check: BalanceCheck, unrecordedSpending: Expense?): Result<Unit> = userFirestore.write {
         val batch = userFirestore.batch()
         val checkRef = userFirestore.collection(FirestorePaths.BALANCE_CHECKS).documentFor(check.id)
         var savedCheck = check

@@ -5,7 +5,6 @@ import com.fintrack.kavindu.core.data.local.entity.toModel
 import com.fintrack.kavindu.core.data.remote.FirestorePaths
 import com.fintrack.kavindu.core.data.remote.UserFirestore
 import com.fintrack.kavindu.core.data.remote.documentFor
-import com.fintrack.kavindu.core.data.remote.firestoreWrite
 import com.fintrack.kavindu.core.data.remote.toFirestoreMap
 import com.fintrack.kavindu.core.model.RecurringItem
 import kotlinx.coroutines.flow.Flow
@@ -22,11 +21,11 @@ class RecurringRepositoryImpl @Inject constructor(
     override fun observeRecurringItems(): Flow<List<RecurringItem>> =
         recurringItemDao.observeAll().map { rows -> rows.map { it.toModel() } }
 
-    override suspend fun saveRecurringItem(item: RecurringItem): Result<Unit> = firestoreWrite {
+    override suspend fun saveRecurringItem(item: RecurringItem): Result<Unit> = userFirestore.write {
         userFirestore.collection(FirestorePaths.RECURRING_ITEMS).documentFor(item.id).set(item.toFirestoreMap())
     }
 
-    override suspend fun deleteRecurringItem(id: String): Result<Unit> = firestoreWrite {
+    override suspend fun deleteRecurringItem(id: String): Result<Unit> = userFirestore.write {
         userFirestore.collection(FirestorePaths.RECURRING_ITEMS).document(id).delete()
     }
 }
