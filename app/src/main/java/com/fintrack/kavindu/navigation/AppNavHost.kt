@@ -14,6 +14,7 @@ import com.fintrack.kavindu.R
 import com.fintrack.kavindu.core.ui.components.EmptyState
 import com.fintrack.kavindu.core.ui.components.LoadingState
 import com.fintrack.kavindu.feature.auth.ui.ForgotPasswordScreen
+import com.fintrack.kavindu.feature.balancecheck.ui.BalanceCheckScreen
 import com.fintrack.kavindu.feature.auth.ui.LoginScreen
 import com.fintrack.kavindu.feature.auth.ui.RegisterScreen
 import com.fintrack.kavindu.feature.auth.viewmodel.SessionUiState
@@ -63,7 +64,13 @@ fun AppNavHost(
                 )
             }
             composable<Settings> {
-                SettingsScreen(onBackClicked = { navController.popBackStack() })
+                SettingsScreen(
+                    onBackClicked = { navController.popBackStack() },
+                    onBalanceCheckClicked = { navController.navigate(WeeklyBalanceCheck) },
+                )
+            }
+            composable<WeeklyBalanceCheck> {
+                BalanceCheckScreen(onBackClicked = { navController.popBackStack() })
             }
         }
     }
