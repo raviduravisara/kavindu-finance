@@ -13,14 +13,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -30,31 +34,48 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.fintrack.kavindu.R
 import com.fintrack.kavindu.core.model.AuthError
+import com.fintrack.kavindu.core.ui.components.AppTopBar
+import com.fintrack.kavindu.core.ui.theme.Dimens
 
 // Building blocks shared by the login, register and forgot-password screens.
+// They follow the UI spec's form pattern (section 5): full-width OutlinedTextFields 16.dp apart,
+// one full-width filled Button, secondary actions as TextButtons.
 
+/**
+ * The frame of an auth form. With [onBackClicked], the title goes in a small top bar with a back arrow
+ * (Register, Forgot password); without it, the title is shown at the top of the form (Login).
+ */
 @Composable
 fun AuthFormColumn(
     title: String,
     subtitle: String,
+    onBackClicked: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .imePadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp, vertical = 48.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(text = title, style = MaterialTheme.typography.headlineMedium)
-        Text(
-            text = subtitle,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        content()
+    Scaffold(
+        topBar = {
+            if (onBackClicked != null) AppTopBar(title = title, onBackClicked = onBackClicked)
+        },
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .padding(Dimens.ScreenPadding),
+            verticalArrangement = Arrangement.spacedBy(Dimens.FormFieldGap),
+        ) {
+            if (onBackClicked == null) {
+                Text(text = title, style = MaterialTheme.typography.titleLarge)
+            }
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            content()
+        }
     }
 }
 
@@ -97,8 +118,11 @@ fun PasswordField(
         enabled = enabled,
         visualTransformation = if (isVisible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
-            TextButton(onClick = onVisibilityToggle) {
-                Text(stringResource(if (isVisible) R.string.auth_hide else R.string.auth_show))
+            IconButton(onClick = onVisibilityToggle) {
+                Icon(
+                    imageVector = if (isVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                    contentDescription = stringResource(if (isVisible) R.string.auth_hide else R.string.auth_show),
+                )
             }
         },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = imeAction),
@@ -107,15 +131,19 @@ fun PasswordField(
     )
 }
 
-// The form's message. Shown under the fields so the user keeps what they typed; pressing the
-// button again is the retry.
+// The form's message, under the fields so the user keeps what they typed; pressing the button again
+// is the retry. Red only for validation errors (the spec's rule); other problems use a calm colour.
 @Composable
 fun AuthErrorText(error: AuthError?) {
     if (error != null) {
         Text(
             text = stringResource(error.messageRes()),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.error,
+            color = if (error.isValidationError()) {
+                MaterialTheme.colorScheme.error
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
         )
     }
 }
@@ -129,6 +157,12 @@ fun AuthButton(text: String, isLoading: Boolean, onClick: () -> Unit) {
             Text(text)
         }
     }
+}
+
+// Problems with what the user typed. No internet, too many attempts and unknown errors are not.
+private fun AuthError.isValidationError(): Boolean = when (this) {
+    AuthError.NO_NETWORK, AuthError.TOO_MANY_ATTEMPTS, AuthError.UNKNOWN -> false
+    else -> true
 }
 
 @StringRes

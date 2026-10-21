@@ -13,13 +13,18 @@ object Money {
     // 13 digits keeps (whole * 100) far below Long.MAX_VALUE.
     private const val MAX_WHOLE_DIGITS = 13
 
-    /** Formats cents as LKR, for example 125050 -> "LKR 1,250.50" and -125050 -> "-LKR 1,250.50". */
+    /**
+     * Formats cents as LKR, as the UI spec shows amounts: "LKR 1,234" for whole amounts and two decimals
+     * only when there are cents. For example 49000000 -> "LKR 490,000", 125050 -> "LKR 1,250.50",
+     * and -125050 -> "-LKR 1,250.50".
+     */
     fun formatLkr(cents: Long): String {
         val sign = if (cents < 0) "-" else ""
         val absolute = abs(cents)
         val whole = absolute / CENTS_PER_UNIT
         val fraction = absolute % CENTS_PER_UNIT
-        return "${sign}LKR ${groupThousands(whole)}.${fraction.toString().padStart(2, '0')}"
+        val decimals = if (fraction == 0L) "" else ".${fraction.toString().padStart(2, '0')}"
+        return "${sign}LKR ${groupThousands(whole)}$decimals"
     }
 
     /**

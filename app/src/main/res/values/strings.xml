@@ -18,11 +18,11 @@
     <string name="error_unknown">Something went wrong. Please try again.</string>
 
     <!-- Weekly balance check (feature/balancecheck) -->
-    <string name="balance_title">Weekly balance check</string>
+    <string name="balance_title">Weekly check-in</string>
     <string name="balance_intro">Once a week, enter what you actually have. The app works out anything that was not recorded, so you never need to track every small spend.</string>
     <string name="balance_first_title">Set your starting point</string>
     <string name="balance_first_text">Enter today\'s balances. Next time, the app compares against these.</string>
-    <string name="balance_last_check">Last check: %1$s · %2$s</string>
+    <string name="balance_last_check_label">Last check</string>
     <string name="balance_bank_label">Bank balance (all accounts)</string>
     <string name="balance_wallet_label">Cash in wallet</string>
     <string name="balance_currency_prefix">LKR </string>
@@ -39,8 +39,10 @@
     <string name="balance_add_income">Add as income</string>
     <string name="balance_ignore">Ignore</string>
     <string name="balance_saved">Saved. See you next week.</string>
-    <string name="settings_balance_section">Weekly balance check</string>
-    <string name="settings_balance_button">Check my balance</string>
+    <!-- Weekly check-in prompt card (same wording as the dashboard in the UI spec) -->
+    <string name="checkin_prompt_title">Weekly check-in</string>
+    <string name="checkin_prompt_text">Enter your balances to catch anything you didn\'t record. About 30 seconds.</string>
+    <string name="checkin_prompt_start">Start</string>
 
     <!-- Settings (feature/settings) -->
     <string name="settings_title">Settings</string>
@@ -65,8 +67,8 @@
     <string name="auth_email">Email</string>
     <string name="auth_password">Password</string>
     <string name="auth_confirm_password">Confirm password</string>
-    <string name="auth_show">Show</string>
-    <string name="auth_hide">Hide</string>
+    <string name="auth_show">Show password</string>
+    <string name="auth_hide">Hide password</string>
     <string name="auth_log_in">Log in</string>
     <string name="auth_create_account">Create account</string>
     <string name="auth_send_reset_link">Send reset link</string>
@@ -86,6 +88,18 @@
     <string name="auth_error_too_many_attempts">Too many attempts. Wait a few minutes and try again.</string>
     <string name="auth_error_unknown">Something went wrong. Please try again.</string>
 
-    <!-- Temporary, until the real dashboard exists -->
-    <string name="placeholder_dashboard">You are logged in. The dashboard is coming soon.</string>
+    <!-- App frame: bottom navigation bar and dashboard top bar (UI spec) -->
+    <string name="nav_home">Home</string>
+    <string name="nav_income">Income</string>
+    <string name="nav_history">History</string>
+    <string name="nav_goal">Goal</string>
+    <string name="dashboard_title">This cycle</string>
+
+    <!-- Temporary placeholders until the real screens exist -->
+    <string name="placeholder_dashboard">The dashboard is coming soon.</string>
+    <string name="placeholder_dashboard_action">Start weekly check-in</string>
+    <string name="placeholder_income">Income is coming soon.</string>
+    <string name="placeholder_history">History is coming soon.</string>
+    <string name="placeholder_goal">Your savings goal is coming soon.</string>
+    <string name="placeholder_back_home">Back to Home</string>
 </resources>
