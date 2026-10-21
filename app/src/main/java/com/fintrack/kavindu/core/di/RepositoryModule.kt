@@ -8,6 +8,8 @@ import com.fintrack.kavindu.core.data.repository.CategoryRepository
 import com.fintrack.kavindu.core.data.repository.CategoryRepositoryImpl
 import com.fintrack.kavindu.core.data.repository.CryptoRepository
 import com.fintrack.kavindu.core.data.repository.CryptoRepositoryImpl
+import com.fintrack.kavindu.core.data.repository.ErrorRepository
+import com.fintrack.kavindu.core.data.repository.ErrorRepositoryImpl
 import com.fintrack.kavindu.core.data.repository.ExpenseRepository
 import com.fintrack.kavindu.core.data.repository.ExpenseRepositoryImpl
 import com.fintrack.kavindu.core.data.repository.FreelanceRepository
@@ -71,4 +73,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindBalanceCheckRepository(impl: BalanceCheckRepositoryImpl): BalanceCheckRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindErrorRepository(impl: ErrorRepositoryImpl): ErrorRepository
 }

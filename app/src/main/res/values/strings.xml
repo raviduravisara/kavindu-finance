@@ -9,6 +9,14 @@
     <string name="action_back">Back</string>
     <string name="action_settings">Settings</string>
 
+    <!-- Common error messages (core/ui/components/ErrorMessages.kt) -->
+    <string name="error_no_network">No internet connection. Check your connection and try again.</string>
+    <string name="error_not_signed_in">Your session has ended. Please log in again.</string>
+    <string name="error_save_rejected">A change could not be saved, so it was undone. Check the details and try again.</string>
+    <string name="error_invalid_data">Some details are not valid. Check them and try again.</string>
+    <string name="error_sync_failed">Some of your data could not be loaded. It will try again when you reopen the app.</string>
+    <string name="error_unknown">Something went wrong. Please try again.</string>
+
     <!-- Settings (feature/settings) -->
     <string name="settings_title">Settings</string>
     <string name="settings_account">Account</string>

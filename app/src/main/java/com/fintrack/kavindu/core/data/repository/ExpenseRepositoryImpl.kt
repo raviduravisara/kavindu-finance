@@ -5,7 +5,6 @@ import com.fintrack.kavindu.core.data.local.entity.toModel
 import com.fintrack.kavindu.core.data.remote.FirestorePaths
 import com.fintrack.kavindu.core.data.remote.UserFirestore
 import com.fintrack.kavindu.core.data.remote.documentFor
-import com.fintrack.kavindu.core.data.remote.firestoreWrite
 import com.fintrack.kavindu.core.data.remote.toFirestoreMap
 import com.fintrack.kavindu.core.model.Expense
 import com.fintrack.kavindu.core.util.PayCycle
@@ -28,11 +27,11 @@ class ExpenseRepositoryImpl @Inject constructor(
         expenseDao.observeSince(date).map { rows -> rows.map { it.toModel() } }
 
     // A recurring entry arrives with its fixed id, e.g. "rent_2026-10-25", so it is never saved twice.
-    override suspend fun saveExpense(expense: Expense): Result<Unit> = firestoreWrite {
+    override suspend fun saveExpense(expense: Expense): Result<Unit> = userFirestore.write {
         userFirestore.collection(FirestorePaths.EXPENSES).documentFor(expense.id).set(expense.toFirestoreMap())
     }
 
-    override suspend fun deleteExpense(id: String): Result<Unit> = firestoreWrite {
+    override suspend fun deleteExpense(id: String): Result<Unit> = userFirestore.write {
         userFirestore.collection(FirestorePaths.EXPENSES).document(id).delete()
     }
 }
