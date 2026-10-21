@@ -5,6 +5,22 @@
     <string name="state_loading">Loading</string>
     <string name="action_try_again">Try again</string>
     <string name="action_log_out">Log out</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_back">Back</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Settings (feature/settings) -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_account">Account</string>
+    <string name="settings_pay_cycle">Pay cycle</string>
+    <string name="settings_start_day_label">My month starts on</string>
+    <string name="settings_start_day_value">Day %1$d</string>
+    <string name="settings_current_cycle">Current cycle: %1$s – %2$s</string>
+    <string name="settings_start_day_help">Totals, safe-to-spend and goal progress all follow this cycle. Only days 1 to 28 can be chosen, so every month has the day.</string>
+    <string name="settings_saved">Saved</string>
+    <string name="settings_save_failed">Could not save. Check your connection and try again.</string>
+    <string name="settings_log_out_title">Log out?</string>
+    <string name="settings_log_out_text">Your data stays safe in your account. Log in again any time to see it.</string>
 
     <!-- Login, register and forgot password (feature/auth) -->
     <string name="auth_login_title">Welcome back</string>

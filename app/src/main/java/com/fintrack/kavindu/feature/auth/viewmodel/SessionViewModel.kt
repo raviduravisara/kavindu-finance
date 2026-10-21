@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 sealed interface SessionUiState {
@@ -26,8 +25,4 @@ class SessionViewModel @Inject constructor(
     val uiState: StateFlow<SessionUiState> = authRepository.currentUserId
         .map { userId -> if (userId == null) SessionUiState.SignedOut else SessionUiState.SignedIn }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SessionUiState.Loading)
-
-    fun onLogoutClicked() {
-        viewModelScope.launch { authRepository.logout() }
-    }
 }

@@ -18,6 +18,7 @@ import com.fintrack.kavindu.feature.auth.ui.LoginScreen
 import com.fintrack.kavindu.feature.auth.ui.RegisterScreen
 import com.fintrack.kavindu.feature.auth.viewmodel.SessionUiState
 import com.fintrack.kavindu.feature.auth.viewmodel.SessionViewModel
+import com.fintrack.kavindu.feature.settings.ui.SettingsScreen
 
 @Composable
 fun AppNavHost(
@@ -53,13 +54,16 @@ fun AppNavHost(
             composable<ForgotPassword> {
                 ForgotPasswordScreen(onBackToLoginClicked = { navController.popBackStack() })
             }
-            // Placeholder until Member 3's dashboard exists. The real logout button comes with Settings.
+            // Placeholder until Member 3's dashboard exists; the real dashboard links to Settings the same way.
             composable<Dashboard> {
                 EmptyState(
                     title = stringResource(R.string.placeholder_dashboard),
-                    actionLabel = stringResource(R.string.action_log_out),
-                    onAction = sessionViewModel::onLogoutClicked,
+                    actionLabel = stringResource(R.string.action_settings),
+                    onAction = { navController.navigate(Settings) },
                 )
+            }
+            composable<Settings> {
+                SettingsScreen(onBackClicked = { navController.popBackStack() })
             }
         }
     }
