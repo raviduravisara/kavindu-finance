@@ -8,7 +8,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.fintrack.kavindu.R
@@ -40,13 +39,13 @@ private fun ForgotPasswordContent(
     AuthFormColumn(
         title = stringResource(R.string.auth_reset_title),
         subtitle = stringResource(R.string.auth_reset_subtitle),
+        onBackClicked = onBackToLoginClicked,
     ) {
         if (uiState.isEmailSent) {
             // Firebase does not reveal whether the email has an account, so neither do we.
             Text(
                 text = stringResource(R.string.auth_reset_sent),
                 style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center,
             )
         } else {
             EmailField(

@@ -44,6 +44,7 @@ private fun RegisterContent(
     AuthFormColumn(
         title = stringResource(R.string.auth_register_title),
         subtitle = stringResource(R.string.auth_register_subtitle),
+        onBackClicked = onLogInClicked,
     ) {
         EmailField(value = uiState.email, onValueChange = onEmailChange, enabled = !uiState.isLoading)
         PasswordField(
