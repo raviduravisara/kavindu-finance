@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Member 2: income screens. Kept in its own file so it never conflicts with the shared strings.xml. -->
+<resources>
+    <string name="income_list_title">Income</string>
+    <string name="income_add_title">Add income</string>
+    <string name="income_edit_title">Edit income</string>
+
+    <string name="income_received_label">Received this cycle</string>
+    <string name="income_received_help">Only money that has arrived. Pending invoices are not counted.</string>
+    <string name="income_by_source">By source</string>
+    <string name="income_empty">Add the money you have received this cycle to see what you really earn.</string>
+    <!-- e.g. "USD 50 at LKR 300 per USD" -->
+    <string name="income_row_converted">%1$s at %3$s per %2$s</string>
+
+    <string name="income_source_label">Source</string>
+    <string name="income_source_salary">Salary</string>
+    <string name="income_source_freelance">Freelance</string>
+    <string name="income_source_adsense">AdSense</string>
+    <string name="income_source_other">Other</string>
+
+    <string name="income_currency_label">Currency</string>
+    <string name="income_amount_label">Amount</string>
+    <string name="income_lkr_received_label">LKR received</string>
+    <string name="income_lkr_received_help">What actually reached your bank</string>
+    <!-- e.g. "1 USD = LKR 300" -->
+    <string name="income_rate_preview">1 %1$s = %2$s</string>
+    <string name="income_date_label">Date received</string>
+    <string name="income_note_label">Note (optional)</string>
+    <string name="income_save">Save</string>
+    <string name="income_ok">OK</string>
+    <string name="income_cancel">Cancel</string>
+
+    <string name="income_delete">Delete</string>
+    <string name="income_delete_title">Delete this income?</string>
+    <string name="income_delete_text">It will be removed from this cycle\'s totals.</string>
+
+    <string name="income_error_amount">Enter an amount above 0, with up to 2 decimals.</string>
+    <string name="income_error_lkr_required">Enter the LKR that reached your bank.</string>
+    <string name="income_error_lkr_invalid">Enter a valid LKR amount, with up to 2 decimals.</string>
+    <string name="income_error_date_future">Income is recorded when it arrives. Pick today or an earlier day.</string>
+</resources>
