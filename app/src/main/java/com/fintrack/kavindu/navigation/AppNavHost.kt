@@ -43,6 +43,8 @@ import com.fintrack.kavindu.feature.auth.ui.RegisterScreen
 import com.fintrack.kavindu.feature.auth.viewmodel.SessionUiState
 import com.fintrack.kavindu.feature.auth.viewmodel.SessionViewModel
 import com.fintrack.kavindu.feature.balancecheck.ui.BalanceCheckScreen
+import com.fintrack.kavindu.feature.income.ui.EditIncomeScreen
+import com.fintrack.kavindu.feature.income.ui.IncomeListScreen
 import com.fintrack.kavindu.feature.settings.ui.SettingsScreen
 
 // The four main screens in the bottom NavigationBar (UI spec, "App frame"): icon above label.
@@ -110,8 +112,18 @@ fun AppNavHost(
                         onCheckInClicked = { navController.navigate(WeeklyBalanceCheck) },
                     )
                 }
+                // Member 2: income
                 composable<IncomeList> {
-                    TabPlaceholder(R.string.nav_income, R.string.placeholder_income) { navController.openTab(TopLevelTab.HOME) }
+                    IncomeListScreen(
+                        onAddIncomeClicked = { navController.navigate(EditIncome()) },
+                        onIncomeClicked = { incomeId -> navController.navigate(EditIncome(incomeId)) },
+                    )
+                }
+                composable<EditIncome> {
+                    EditIncomeScreen(
+                        onBackClicked = { navController.popBackStack() },
+                        onDone = { navController.popBackStack() },
+                    )
                 }
                 composable<TransactionHistory> {
                     TabPlaceholder(R.string.nav_history, R.string.placeholder_history) { navController.openTab(TopLevelTab.HOME) }
