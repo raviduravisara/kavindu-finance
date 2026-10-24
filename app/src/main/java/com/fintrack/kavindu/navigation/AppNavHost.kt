@@ -43,6 +43,8 @@ import com.fintrack.kavindu.feature.auth.ui.RegisterScreen
 import com.fintrack.kavindu.feature.auth.viewmodel.SessionUiState
 import com.fintrack.kavindu.feature.auth.viewmodel.SessionViewModel
 import com.fintrack.kavindu.feature.balancecheck.ui.BalanceCheckScreen
+import com.fintrack.kavindu.feature.goal.ui.EditGoalScreen
+import com.fintrack.kavindu.feature.goal.ui.GoalScreen
 import com.fintrack.kavindu.feature.income.ui.EditIncomeScreen
 import com.fintrack.kavindu.feature.income.ui.IncomeListScreen
 import com.fintrack.kavindu.feature.settings.ui.SettingsScreen
@@ -128,8 +130,15 @@ fun AppNavHost(
                 composable<TransactionHistory> {
                     TabPlaceholder(R.string.nav_history, R.string.placeholder_history) { navController.openTab(TopLevelTab.HOME) }
                 }
+                // Member 2: goal
                 composable<GoalOverview> {
-                    TabPlaceholder(R.string.nav_goal, R.string.placeholder_goal) { navController.openTab(TopLevelTab.HOME) }
+                    GoalScreen(onEditGoalClicked = { navController.navigate(EditGoal) })
+                }
+                composable<EditGoal> {
+                    EditGoalScreen(
+                        onBackClicked = { navController.popBackStack() },
+                        onDone = { navController.popBackStack() },
+                    )
                 }
 
                 composable<Settings> {
