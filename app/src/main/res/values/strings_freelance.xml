@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Member 2: freelance screens. Kept in its own file so it never conflicts with the shared strings.xml. -->
+<resources>
+    <string name="freelance_title">Freelance</string>
+    <string name="freelance_add_project">Add project</string>
+    <string name="freelance_add_milestone">Add milestone</string>
+    <string name="freelance_empty">Add a client project to keep track of the invoices you are owed.</string>
+    <string name="freelance_no_milestones">Add the payments this project is split into, with their due dates.</string>
+
+    <string name="freelance_still_owed">Still owed by clients</string>
+    <string name="freelance_nothing_owed">Nothing owed</string>
+    <string name="freelance_not_counted">Not counted as income until it is paid.</string>
+    <string name="freelance_paid_up">All paid</string>
+    <!-- e.g. "2 of 3 payments received" -->
+    <string name="freelance_received_of">%1$d of %2$d payments received</string>
+    <string name="freelance_overdue_one">1 invoice overdue · worth a follow-up</string>
+    <string name="freelance_overdue_many">%1$d invoices overdue · worth a follow-up</string>
+    <string name="freelance_project_pending">%1$s still owed</string>
+
+    <string name="freelance_card_title">Freelance invoices</string>
+    <string name="freelance_card_pending">%1$s pending · not counted</string>
+
+    <string name="freelance_client_label">Client</string>
+    <string name="freelance_project_label">Project</string>
+    <string name="freelance_milestone_label">Milestone (e.g. Design approved)</string>
+    <string name="freelance_amount_label">Amount</string>
+    <string name="freelance_due_label">Due date</string>
+    <string name="freelance_due">Due %1$s</string>
+    <string name="freelance_overdue_detail">Was due %1$s · follow up with the client</string>
+    <string name="freelance_received_detail">Received · added to your income</string>
+
+    <string name="freelance_status_pending">Pending</string>
+    <string name="freelance_status_received">Received</string>
+    <string name="freelance_status_cancelled">Cancelled</string>
+
+    <string name="freelance_mark_received">Mark received</string>
+    <!-- e.g. "Design approved · LKR 45,000" -->
+    <string name="freelance_receive_text">%1$s · %2$s</string>
+    <string name="freelance_received_on">Received on</string>
+    <string name="freelance_receive_note">This adds the payment to your income, linked to this project.</string>
+
+    <string name="freelance_cancel_milestone">Cancel</string>
+    <string name="freelance_cancel_title">Cancel this milestone?</string>
+    <string name="freelance_cancel_text">%1$s will no longer count as owed.</string>
+    <string name="freelance_cancel_confirm">Cancel milestone</string>
+    <string name="freelance_keep">Keep</string>
+
+    <string name="freelance_save">Save</string>
+    <string name="freelance_ok">OK</string>
+    <string name="freelance_cancel">Cancel</string>
+
+    <string name="freelance_error_client">Enter the client\'s name.</string>
+    <string name="freelance_error_project">Enter the project name.</string>
+    <string name="freelance_error_title">Enter what this payment is for.</string>
+    <string name="freelance_error_too_long">Use 100 characters or fewer.</string>
+    <string name="freelance_error_amount">Enter an amount above 0, with up to 2 decimals.</string>
+</resources>
