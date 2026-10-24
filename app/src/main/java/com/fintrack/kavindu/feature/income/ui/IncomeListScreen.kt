@@ -10,8 +10,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -28,6 +30,7 @@ import com.fintrack.kavindu.core.ui.components.EmptyState
 import com.fintrack.kavindu.core.ui.components.ErrorState
 import com.fintrack.kavindu.core.ui.components.HeroCard
 import com.fintrack.kavindu.core.ui.components.LoadingState
+import com.fintrack.kavindu.core.ui.components.PromptCard
 import com.fintrack.kavindu.core.ui.components.StandardCard
 import com.fintrack.kavindu.core.ui.components.messageRes
 import com.fintrack.kavindu.core.ui.theme.Dimens
@@ -41,6 +44,7 @@ import com.fintrack.kavindu.feature.income.viewmodel.SourceTotal
 fun IncomeListScreen(
     onAddIncomeClicked: () -> Unit,
     onIncomeClicked: (String) -> Unit,
+    onFreelanceClicked: () -> Unit,
     viewModel: IncomeListViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -49,6 +53,11 @@ fun IncomeListScreen(
             AppTopBar(
                 title = stringResource(R.string.income_list_title),
                 subtitle = uiState.cycleLabel.ifEmpty { null },
+                actions = {
+                    IconButton(onClick = onFreelanceClicked) {
+                        Icon(imageVector = Icons.Filled.Work, contentDescription = stringResource(R.string.freelance_title))
+                    }
+                },
             )
         },
         floatingActionButton = {
@@ -76,13 +85,18 @@ fun IncomeListScreen(
                 onAction = onAddIncomeClicked,
                 modifier = Modifier.padding(innerPadding),
             )
-            else -> IncomeListContent(uiState, onIncomeClicked, Modifier.padding(innerPadding))
+            else -> IncomeListContent(uiState, onIncomeClicked, onFreelanceClicked, Modifier.padding(innerPadding))
         }
     }
 }
 
 @Composable
-private fun IncomeListContent(uiState: IncomeListUiState, onIncomeClicked: (String) -> Unit, modifier: Modifier) {
+private fun IncomeListContent(
+    uiState: IncomeListUiState,
+    onIncomeClicked: (String) -> Unit,
+    onFreelanceClicked: () -> Unit,
+    modifier: Modifier,
+) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         // Extra bottom space so the last entry is never hidden behind the Add income button.
@@ -90,6 +104,9 @@ private fun IncomeListContent(uiState: IncomeListUiState, onIncomeClicked: (Stri
         verticalArrangement = Arrangement.spacedBy(Dimens.CardGap),
     ) {
         item { ReceivedCard(uiState.totalReceived) }
+        if (uiState.freelancePending != null || uiState.overdueInvoices > 0) {
+            item { FreelanceCard(uiState.freelancePending, uiState.overdueInvoices, onFreelanceClicked) }
+        }
         if (uiState.bySource.size > 1) {
             item { BySourceCard(uiState.bySource) }
         }
@@ -140,5 +157,23 @@ private fun IncomeRowCard(row: IncomeRow, onClick: () -> Unit) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+    }
+}
+
+// Money owed by clients is shown next to income but never added to it (FR-14). Tapping opens the projects.
+@Composable
+private fun FreelanceCard(pending: String?, overdue: Int, onClick: () -> Unit) {
+    PromptCard(onClick = onClick) {
+        Text(text = stringResource(R.string.freelance_card_title), style = MaterialTheme.typography.titleMedium)
+        if (pending != null) {
+            Text(text = stringResource(R.string.freelance_card_pending, pending), style = MaterialTheme.typography.bodyMedium)
+        }
+        if (overdue > 0) {
+            Text(
+                text = if (overdue == 1) stringResource(R.string.freelance_overdue_one)
+                else stringResource(R.string.freelance_overdue_many, overdue),
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
     }
 }
