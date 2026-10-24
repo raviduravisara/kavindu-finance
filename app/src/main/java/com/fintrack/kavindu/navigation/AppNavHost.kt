@@ -43,6 +43,8 @@ import com.fintrack.kavindu.feature.auth.ui.RegisterScreen
 import com.fintrack.kavindu.feature.auth.viewmodel.SessionUiState
 import com.fintrack.kavindu.feature.auth.viewmodel.SessionViewModel
 import com.fintrack.kavindu.feature.balancecheck.ui.BalanceCheckScreen
+import com.fintrack.kavindu.feature.freelance.ui.FreelanceProjectDetailScreen
+import com.fintrack.kavindu.feature.freelance.ui.FreelanceProjectsScreen
 import com.fintrack.kavindu.feature.goal.ui.EditGoalScreen
 import com.fintrack.kavindu.feature.goal.ui.GoalScreen
 import com.fintrack.kavindu.feature.income.ui.EditIncomeScreen
@@ -119,6 +121,7 @@ fun AppNavHost(
                     IncomeListScreen(
                         onAddIncomeClicked = { navController.navigate(EditIncome()) },
                         onIncomeClicked = { incomeId -> navController.navigate(EditIncome(incomeId)) },
+                        onFreelanceClicked = { navController.navigate(FreelanceProjects) },
                     )
                 }
                 composable<EditIncome> {
@@ -126,6 +129,16 @@ fun AppNavHost(
                         onBackClicked = { navController.popBackStack() },
                         onDone = { navController.popBackStack() },
                     )
+                }
+                // Member 2: freelance, opened from the Income tab
+                composable<FreelanceProjects> {
+                    FreelanceProjectsScreen(
+                        onBackClicked = { navController.popBackStack() },
+                        onProjectClicked = { projectId -> navController.navigate(FreelanceProjectDetail(projectId)) },
+                    )
+                }
+                composable<FreelanceProjectDetail> {
+                    FreelanceProjectDetailScreen(onBackClicked = { navController.popBackStack() })
                 }
                 composable<TransactionHistory> {
                     TabPlaceholder(R.string.nav_history, R.string.placeholder_history) { navController.openTab(TopLevelTab.HOME) }

@@ -2,15 +2,19 @@ package com.fintrack.kavindu.feature.income.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fintrack.kavindu.core.data.repository.FreelanceRepository
 import com.fintrack.kavindu.core.data.repository.IncomeRepository
 import com.fintrack.kavindu.core.data.repository.ProfileRepository
 import com.fintrack.kavindu.core.model.AppError
 import com.fintrack.kavindu.core.model.Currency
 import com.fintrack.kavindu.core.model.Income
 import com.fintrack.kavindu.core.model.IncomeSource
+import com.fintrack.kavindu.core.model.Milestone
 import com.fintrack.kavindu.core.model.asAppError
 import com.fintrack.kavindu.core.util.Money
 import com.fintrack.kavindu.core.util.PayCycle
+import com.fintrack.kavindu.feature.freelance.viewmodel.FreelanceRules
+import com.fintrack.kavindu.feature.freelance.viewmodel.observeProjectsWithMilestones
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -18,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -47,6 +52,8 @@ data class IncomeListUiState(
     val totalReceived: String = "",
     val bySource: List<SourceTotal> = emptyList(), // only sources with income this cycle
     val rows: List<IncomeRow> = emptyList(),
+    val freelancePending: String? = null, // e.g. "LKR 85,000": owed by clients, shown but not counted (FR-14)
+    val overdueInvoices: Int = 0,
 ) {
     val isEmpty: Boolean get() = rows.isEmpty()
 }
@@ -60,6 +67,7 @@ data class IncomeListUiState(
 class IncomeListViewModel @Inject constructor(
     private val incomeRepository: IncomeRepository,
     private val profileRepository: ProfileRepository,
+    private val freelanceRepository: FreelanceRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(IncomeListUiState())
@@ -84,7 +92,10 @@ class IncomeListViewModel @Inject constructor(
                 .distinctUntilChanged()
                 .flatMapLatest { startDay ->
                     val cycle = PayCycle.containing(LocalDate.now(), startDay)
-                    incomeRepository.observeIncomes(cycle).map { incomes -> buildState(cycle, incomes) }
+                    combine(
+                        incomeRepository.observeIncomes(cycle),
+                        freelanceRepository.observeProjectsWithMilestones(),
+                    ) { incomes, projects -> buildState(cycle, incomes, projects.flatMap { it.second }) }
                 }
                 .catch { error -> _uiState.update { it.copy(isLoading = false, loadError = error.asAppError()) } }
                 .collect { state -> _uiState.value = state }
@@ -93,7 +104,7 @@ class IncomeListViewModel @Inject constructor(
 
     fun onRetryClicked() = load()
 
-    private fun buildState(cycle: PayCycle, incomes: List<Income>): IncomeListUiState {
+    private fun buildState(cycle: PayCycle, incomes: List<Income>, milestones: List<Milestone>): IncomeListUiState {
         val bySource = IncomeSource.entries.mapNotNull { source ->
             val total = incomes.filter { it.source == source }.sumOf { it.lkrAmountCents }
             if (total > 0) SourceTotal(source, Money.formatLkr(total)) else null
@@ -104,6 +115,8 @@ class IncomeListViewModel @Inject constructor(
             totalReceived = Money.formatLkr(incomes.sumOf { it.lkrAmountCents }),
             bySource = bySource,
             rows = incomes.map { it.toRow() },
+            freelancePending = FreelanceRules.formatPending(FreelanceRules.pendingByCurrency(milestones)),
+            overdueInvoices = milestones.count { FreelanceRules.isOverdue(it, LocalDate.now()) },
         )
     }
 
