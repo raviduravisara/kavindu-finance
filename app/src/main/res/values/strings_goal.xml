@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Member 2: goal screens. Kept in its own file so it never conflicts with the shared strings.xml. -->
+<resources>
+    <string name="goal_tab_title">Goal</string>
+    <string name="goal_set_title">Set a goal</string>
+    <string name="goal_edit_title">Edit goal</string>
+    <string name="goal_empty">Set a savings goal to see what you need each cycle</string>
+
+    <string name="goal_saved_so_far">Saved so far</string>
+    <!-- e.g. "of LKR 490,000 · 10% · Deadline 14 Oct 2027" -->
+    <string name="goal_of_target">of %1$s · %2$d%% · Deadline %3$s</string>
+    <string name="goal_needed_this_cycle">Needed this cycle</string>
+    <string name="goal_saved_this_cycle">Saved this cycle</string>
+    <string name="goal_to_go">%1$s to go</string>
+    <string name="goal_cycle_done">This cycle\'s saving is done</string>
+
+    <string name="goal_status_on_track">On track</string>
+    <string name="goal_status_behind">A little behind</string>
+    <string name="goal_status_reached">Goal reached</string>
+    <string name="goal_status_deadline_passed">Deadline passed</string>
+
+    <string name="goal_projected_finish">Projected finish</string>
+    <string name="goal_finish_on_time">%1$s, on your deadline</string>
+    <string name="goal_finish_one_month_late">%1$s, 1 month after your deadline</string>
+    <string name="goal_finish_months_late">%1$s, %2$d months after your deadline</string>
+    <string name="goal_finish_unknown">Your first estimate appears after one full pay cycle.</string>
+
+    <string name="goal_what_changed">What changed your date</string>
+    <string name="goal_no_effects">Nothing has moved your date this cycle.</string>
+    <string name="goal_effect_check_in">Weekly check-in</string>
+    <string name="goal_effect_expense">Expense</string>
+    <!-- e.g. "LKR 2,500 · 23 Oct" -->
+    <string name="goal_effect_detail">%1$s · %2$s</string>
+    <string name="goal_effect_unrecorded">%1$s unrecorded · %2$s</string>
+    <string name="goal_days_under_one">under a day</string>
+    <string name="goal_days_one">+1 day</string>
+    <string name="goal_days_many">+%1$d days</string>
+
+    <string name="goal_reached_text">You saved %1$s of %2$s.</string>
+    <string name="goal_set_new">Set a new goal</string>
+    <string name="goal_short">%1$s short</string>
+    <string name="goal_deadline_passed_text">Deadline was %1$s. Saved so far: %2$s.</string>
+    <string name="goal_choose_new_date">Choose a new date</string>
+
+    <string name="goal_name_label">What are you saving for?</string>
+    <string name="goal_name_placeholder">e.g. a new laptop</string>
+    <string name="goal_target_label">Target amount</string>
+    <string name="goal_starting_label">Already saved (optional)</string>
+    <string name="goal_starting_placeholder">0</string>
+    <string name="goal_deadline_label">Deadline</string>
+    <!-- e.g. "That is about LKR 39,900 a cycle for 12 cycles." -->
+    <string name="goal_per_cycle_hint">That is about %1$s a cycle for %2$d cycles.</string>
+    <string name="goal_save">Save goal</string>
+    <string name="goal_ok">OK</string>
+    <string name="goal_cancel">Cancel</string>
+
+    <string name="goal_delete">Delete</string>
+    <string name="goal_delete_title">Delete this goal?</string>
+    <string name="goal_delete_text">Your income and expenses stay. Only the goal is removed.</string>
+
+    <string name="goal_error_name_required">Give your goal a name.</string>
+    <string name="goal_error_name_too_long">Use 100 characters or fewer.</string>
+    <string name="goal_error_target">Enter a target above 0, with up to 2 decimals.</string>
+    <string name="goal_error_starting">Enter a valid amount, or leave it empty.</string>
+    <string name="goal_error_deadline">Pick a deadline after today.</string>
+</resources>
