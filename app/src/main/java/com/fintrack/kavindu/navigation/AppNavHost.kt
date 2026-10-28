@@ -43,6 +43,7 @@ import com.fintrack.kavindu.feature.auth.ui.RegisterScreen
 import com.fintrack.kavindu.feature.auth.viewmodel.SessionUiState
 import com.fintrack.kavindu.feature.auth.viewmodel.SessionViewModel
 import com.fintrack.kavindu.feature.balancecheck.ui.BalanceCheckScreen
+import com.fintrack.kavindu.feature.crypto.ui.CryptoScreen
 import com.fintrack.kavindu.feature.freelance.ui.FreelanceProjectDetailScreen
 import com.fintrack.kavindu.feature.freelance.ui.FreelanceProjectsScreen
 import com.fintrack.kavindu.feature.goal.ui.EditGoalScreen
@@ -122,6 +123,7 @@ fun AppNavHost(
                         onAddIncomeClicked = { navController.navigate(EditIncome()) },
                         onIncomeClicked = { incomeId -> navController.navigate(EditIncome(incomeId)) },
                         onFreelanceClicked = { navController.navigate(FreelanceProjects) },
+                        onCryptoClicked = { navController.navigate(Crypto) },
                     )
                 }
                 composable<EditIncome> {
@@ -139,6 +141,10 @@ fun AppNavHost(
                 }
                 composable<FreelanceProjectDetail> {
                     FreelanceProjectDetailScreen(onBackClicked = { navController.popBackStack() })
+                }
+                // Member 2: crypto, opened from the Income tab
+                composable<Crypto> {
+                    CryptoScreen(onBackClicked = { navController.popBackStack() })
                 }
                 composable<TransactionHistory> {
                     TabPlaceholder(R.string.nav_history, R.string.placeholder_history) { navController.openTab(TopLevelTab.HOME) }

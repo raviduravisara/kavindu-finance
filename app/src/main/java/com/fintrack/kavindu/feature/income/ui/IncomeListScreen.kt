@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -45,6 +46,7 @@ fun IncomeListScreen(
     onAddIncomeClicked: () -> Unit,
     onIncomeClicked: (String) -> Unit,
     onFreelanceClicked: () -> Unit,
+    onCryptoClicked: () -> Unit,
     viewModel: IncomeListViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -56,6 +58,9 @@ fun IncomeListScreen(
                 actions = {
                     IconButton(onClick = onFreelanceClicked) {
                         Icon(imageVector = Icons.Filled.Work, contentDescription = stringResource(R.string.freelance_title))
+                    }
+                    IconButton(onClick = onCryptoClicked) {
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ShowChart, contentDescription = stringResource(R.string.crypto_title))
                     }
                 },
             )
