@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Member 2: crypto screen. Kept in its own file so it never conflicts with the shared strings.xml. -->
+<resources>
+    <string name="crypto_title">Crypto</string>
+    <string name="crypto_add_transfer">Add transfer</string>
+    <string name="crypto_net_position">Net position</string>
+    <string name="crypto_net_help">Money taken out minus money put in. Price changes inside Binance are not counted.</string>
+    <string name="crypto_net_negative">More is still in Binance than has come back out. It only counts once it is in your bank.</string>
+    <string name="crypto_moved_in">Moved into Binance</string>
+    <string name="crypto_moved_out">Moved out to bank</string>
+    <string name="crypto_counted_title">Counted as income</string>
+    <string name="crypto_counted_cycle">%1$s this cycle</string>
+    <string name="crypto_counted_total">%1$s in total</string>
+    <string name="crypto_counted_help">Only when you take out more than you have ever put in, so profit is never counted twice.</string>
+    <string name="crypto_empty">Record money you move into or out of Binance to see your real crypto position.</string>
+    <string name="crypto_into">Into Binance</string>
+    <string name="crypto_out_of">Out to bank</string>
+    <string name="crypto_amount_label">Amount in LKR</string>
+    <string name="crypto_note_label">Note (optional)</string>
+    <string name="crypto_save">Save</string>
+    <string name="crypto_ok">OK</string>
+    <string name="crypto_cancel">Cancel</string>
+    <string name="crypto_delete">Delete</string>
+    <string name="crypto_delete_title">Delete this transfer?</string>
+    <string name="crypto_delete_text">%1$s on %2$s will be removed from your crypto totals.</string>
+    <string name="crypto_error_amount">Enter an amount above 0, with up to 2 decimals.</string>
+</resources>
