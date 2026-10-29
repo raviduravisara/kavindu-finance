@@ -1,12 +1,15 @@
 package com.fintrack.kavindu.feature.goal.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.fintrack.kavindu.core.data.repository.GoalRepository
 import com.fintrack.kavindu.core.model.AppError
 import com.fintrack.kavindu.core.model.Goal
 import com.fintrack.kavindu.core.model.asAppError
 import com.fintrack.kavindu.core.util.Money
+import com.fintrack.kavindu.navigation.EditGoal
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -47,11 +50,16 @@ data class EditGoalUiState(
 /**
  * Set or change the savings goal (FR-36). One active goal, as in the GoalRepository.
  * A new goal starts counting today; editing keeps the original start date, so "saved so far" does not reset.
+ * "Set a new goal" (after a goal is reached) opens an empty form and starts counting again from today.
+ * It reuses the same document and its createdAt, because the security rules never let createdAt change.
  */
 @HiltViewModel
 class EditGoalViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val goalRepository: GoalRepository,
 ) : ViewModel() {
+
+    private val startNew: Boolean = savedStateHandle.toRoute<EditGoal>().startNew
 
     private val _uiState = MutableStateFlow(EditGoalUiState())
     val uiState: StateFlow<EditGoalUiState> = _uiState.asStateFlow()
@@ -69,7 +77,7 @@ class EditGoalViewModel @Inject constructor(
             try {
                 val goal = goalRepository.observeGoal().first()
                 original = goal
-                if (goal != null) {
+                if (goal != null && !startNew) {
                     deadline = goal.deadline
                     _uiState.update {
                         it.copy(
@@ -140,7 +148,7 @@ class EditGoalViewModel @Inject constructor(
             targetCents = check.targetCents!!,
             deadline = deadline,
             startingSavingsCents = check.startingSavingsCents!!,
-            startDate = old?.startDate ?: today,
+            startDate = if (old == null || startNew) today else old.startDate,
             createdAt = old?.createdAt ?: System.currentTimeMillis(),
         )
         _uiState.update { it.copy(isSaving = true, saveError = null) }

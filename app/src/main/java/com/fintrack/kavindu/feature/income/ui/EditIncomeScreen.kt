@@ -75,7 +75,7 @@ fun EditIncomeScreen(
                 title = stringResource(if (uiState.isEditing) R.string.income_edit_title else R.string.income_add_title),
                 onBackClicked = onBackClicked,
                 actions = {
-                    if (uiState.isEditing && !uiState.isLoading && uiState.loadError == null) {
+                    if (uiState.isEditing && !uiState.isLinkedToProject && !uiState.isLoading && uiState.loadError == null) {
                         IconButton(onClick = viewModel::onDeleteClicked, enabled = !uiState.isSaving) {
                             Icon(imageVector = Icons.Filled.Delete, contentDescription = stringResource(R.string.income_delete))
                         }
@@ -144,6 +144,7 @@ private fun EditIncomeForm(
     onSaveClicked: () -> Unit,
 ) {
     val enabled = !uiState.isSaving
+    val canChangeSourceAndCurrency = enabled && !uiState.isLinkedToProject
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -163,13 +164,20 @@ private fun EditIncomeForm(
                     selected = source == uiState.source,
                     onClick = { onSourceSelected(source) },
                     label = { Text(stringResource(source.labelRes())) },
-                    enabled = enabled,
+                    enabled = canChangeSourceAndCurrency,
                 )
             }
         }
+        if (uiState.isLinkedToProject) {
+            Text(
+                text = stringResource(R.string.income_linked_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
 
         SectionLabel(stringResource(R.string.income_currency_label))
-        CurrencySelector(selected = uiState.currency, enabled = enabled, onSelected = onCurrencySelected)
+        CurrencySelector(selected = uiState.currency, enabled = canChangeSourceAndCurrency, onSelected = onCurrencySelected)
 
         AmountField(
             value = uiState.amountInput,

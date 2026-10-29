@@ -33,6 +33,7 @@
     <string name="income_delete">Delete</string>
     <string name="income_delete_title">Delete this income?</string>
     <string name="income_delete_text">It will be removed from this cycle\'s totals.</string>
+    <string name="income_linked_note">This payment came from a freelance project, so its source and currency stay as they are and it cannot be deleted here. You can still fix the amount, date or note.</string>
 
     <string name="income_error_amount">Enter an amount above 0, with up to 2 decimals.</string>
     <string name="income_error_lkr_required">Enter the LKR that reached your bank.</string>
