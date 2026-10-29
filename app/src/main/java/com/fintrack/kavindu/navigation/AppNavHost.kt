@@ -151,7 +151,10 @@ fun AppNavHost(
                 }
                 // Member 2: goal
                 composable<GoalOverview> {
-                    GoalScreen(onEditGoalClicked = { navController.navigate(EditGoal) })
+                    GoalScreen(
+                        onEditGoalClicked = { navController.navigate(EditGoal()) },
+                        onSetNewGoalClicked = { navController.navigate(EditGoal(startNew = true)) },
+                    )
                 }
                 composable<EditGoal> {
                     EditGoalScreen(

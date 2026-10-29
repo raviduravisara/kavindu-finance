@@ -46,6 +46,9 @@ data class EditIncomeUiState(
     val saveError: AppError? = null,
     val isDeleteDialogVisible: Boolean = false,
     val isDone: Boolean = false, // saved or deleted: the screen closes
+    // Created by "Mark received" on a freelance milestone: its source, currency and delete stay locked,
+    // so the milestone never points to an income that was removed or changed into another source.
+    val isLinkedToProject: Boolean = false,
 ) {
     val showsLkrReceived: Boolean get() = currency != Currency.LKR
 }
@@ -96,6 +99,7 @@ class EditIncomeViewModel @Inject constructor(
                         amountInput = IncomeFormat.toInputText(income.amountCents),
                         lkrReceivedInput = if (income.currency == Currency.LKR) "" else IncomeFormat.toInputText(income.lkrAmountCents),
                         noteInput = income.note.orEmpty(),
+                        isLinkedToProject = income.milestoneId != null,
                     )
                 }
                 refreshRatePreview()
@@ -109,9 +113,13 @@ class EditIncomeViewModel @Inject constructor(
         incomeId?.let(::load)
     }
 
-    fun onSourceSelected(source: IncomeSource) = _uiState.update { it.copy(source = source) }
+    fun onSourceSelected(source: IncomeSource) {
+        if (_uiState.value.isLinkedToProject) return
+        _uiState.update { it.copy(source = source) }
+    }
 
     fun onCurrencySelected(currency: Currency) {
+        if (_uiState.value.isLinkedToProject) return
         _uiState.update { it.copy(currency = currency, lkrReceivedError = null) }
         refreshRatePreview()
     }
@@ -178,7 +186,10 @@ class EditIncomeViewModel @Inject constructor(
         }
     }
 
-    fun onDeleteClicked() = _uiState.update { it.copy(isDeleteDialogVisible = true) }
+    fun onDeleteClicked() {
+        if (_uiState.value.isLinkedToProject) return
+        _uiState.update { it.copy(isDeleteDialogVisible = true) }
+    }
 
     fun onDeleteDismissed() = _uiState.update { it.copy(isDeleteDialogVisible = false) }
 

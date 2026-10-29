@@ -51,6 +51,7 @@ import com.fintrack.kavindu.feature.goal.viewmodel.GoalViewModel
 @Composable
 fun GoalScreen(
     onEditGoalClicked: () -> Unit,
+    onSetNewGoalClicked: () -> Unit,
     viewModel: GoalViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -83,13 +84,18 @@ fun GoalScreen(
                 onAction = onEditGoalClicked,
                 modifier = Modifier.padding(innerPadding),
             )
-            else -> GoalContent(details, onEditGoalClicked, Modifier.padding(innerPadding))
+            else -> GoalContent(details, onEditGoalClicked, onSetNewGoalClicked, Modifier.padding(innerPadding))
         }
     }
 }
 
 @Composable
-private fun GoalContent(details: GoalDetails, onEditGoalClicked: () -> Unit, modifier: Modifier) {
+private fun GoalContent(
+    details: GoalDetails,
+    onEditGoalClicked: () -> Unit,
+    onSetNewGoalClicked: () -> Unit,
+    modifier: Modifier,
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -98,7 +104,7 @@ private fun GoalContent(details: GoalDetails, onEditGoalClicked: () -> Unit, mod
         verticalArrangement = Arrangement.spacedBy(Dimens.CardGap),
     ) {
         when (details.status) {
-            GoalStatus.REACHED -> ReachedCard(details, onEditGoalClicked)
+            GoalStatus.REACHED -> ReachedCard(details, onSetNewGoalClicked)
             GoalStatus.DEADLINE_PASSED -> DeadlinePassedCard(details, onEditGoalClicked)
             else -> {
                 SavedSoFarCard(details)

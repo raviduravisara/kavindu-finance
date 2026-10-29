@@ -16,7 +16,7 @@ import kotlinx.serialization.Serializable
 @Serializable data object IncomeList
 @Serializable data class EditIncome(val incomeId: String? = null) // null = new income
 @Serializable data object GoalOverview // not "Goal": that name is the model class
-@Serializable data object EditGoal
+@Serializable data class EditGoal(val startNew: Boolean = false) // true = "Set a new goal" after one is reached
 @Serializable data object FreelanceProjects
 @Serializable data class FreelanceProjectDetail(val projectId: String)
 @Serializable data object Crypto
