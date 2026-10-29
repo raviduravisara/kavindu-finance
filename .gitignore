@@ -13,6 +13,9 @@
 .externalNativeBuild
 .cxx
 local.properties
+# Signing keys: never commit them
+*.jks
+*.keystore
 # Firebase CLI cache and logs
 .firebase/
 firebase-debug.log
