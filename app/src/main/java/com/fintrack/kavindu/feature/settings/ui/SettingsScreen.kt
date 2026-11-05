@@ -25,6 +25,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -57,6 +60,7 @@ import com.fintrack.kavindu.feature.settings.viewmodel.ExportResult
 import com.fintrack.kavindu.feature.settings.viewmodel.SettingsMessage
 import com.fintrack.kavindu.feature.settings.viewmodel.SettingsUiState
 import com.fintrack.kavindu.feature.settings.viewmodel.SettingsViewModel
+import com.fintrack.kavindu.feature.settings.viewmodel.ThemeMode
 import java.time.LocalTime
 
 @Composable
@@ -88,6 +92,7 @@ fun SettingsScreen(
                 modifier = Modifier.padding(innerPadding),
                 onBalanceCheckClicked = onBalanceCheckClicked,
                 onStartDaySelected = viewModel::onStartDaySelected,
+                onThemeSelected = viewModel::onThemeSelected,
                 onReminderToggled = { enabled ->
                     if (enabled && ReminderNotification.needsPermission(context)) {
                         notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -113,6 +118,7 @@ private fun SettingsContent(
     modifier: Modifier,
     onBalanceCheckClicked: () -> Unit,
     onStartDaySelected: (Int) -> Unit,
+    onThemeSelected: (ThemeMode) -> Unit,
     onReminderToggled: (Boolean) -> Unit,
     onReminderTimeClicked: () -> Unit,
     onReminderTimeSelected: (hour: Int, minute: Int) -> Unit,
@@ -138,6 +144,8 @@ private fun SettingsContent(
             )
             Text(text = uiState.email, style = MaterialTheme.typography.bodyLarge)
         }
+
+        AppearanceCard(selected = uiState.themeMode, onThemeSelected = onThemeSelected)
 
         StandardCard {
             Text(text = stringResource(R.string.settings_pay_cycle), style = MaterialTheme.typography.titleMedium)
@@ -211,6 +219,38 @@ private fun SettingsContent(
             onDismiss = onReminderTimeDismissed,
         )
     }
+}
+
+// Appearance: System / Light / Dark in one segmented row. Saved on this phone only; the app switches straight away.
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AppearanceCard(selected: ThemeMode, onThemeSelected: (ThemeMode) -> Unit) {
+    StandardCard {
+        Text(text = stringResource(R.string.settings_appearance), style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.height(8.dp))
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            ThemeMode.entries.forEachIndexed { index, mode ->
+                SegmentedButton(
+                    selected = selected == mode,
+                    onClick = { onThemeSelected(mode) },
+                    shape = SegmentedButtonDefaults.itemShape(index = index, count = ThemeMode.entries.size),
+                ) {
+                    Text(stringResource(mode.labelRes()))
+                }
+            }
+        }
+        Text(
+            text = stringResource(R.string.settings_theme_help),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+private fun ThemeMode.labelRes(): Int = when (this) {
+    ThemeMode.SYSTEM -> R.string.settings_theme_system
+    ThemeMode.LIGHT -> R.string.settings_theme_light
+    ThemeMode.DARK -> R.string.settings_theme_dark
 }
 
 // Daily reminder: on/off switch, and the time when it is on. Saved on this phone only.
@@ -360,6 +400,7 @@ private fun SettingsPreview() {
             modifier = Modifier,
             onBalanceCheckClicked = {},
             onStartDaySelected = {},
+            onThemeSelected = {},
             onReminderToggled = {},
             onReminderTimeClicked = {},
             onReminderTimeSelected = { _, _ -> },

@@ -10,6 +10,7 @@ import com.fintrack.kavindu.feature.reminder.data.ReminderScheduler
 import com.fintrack.kavindu.feature.reminder.data.ReminderSettingsRepository
 import com.fintrack.kavindu.feature.reminder.viewmodel.ReminderTime
 import com.fintrack.kavindu.feature.settings.data.CsvExportRepository
+import com.fintrack.kavindu.feature.settings.data.ThemeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -48,6 +49,8 @@ data class SettingsUiState(
     val exportFileName: String = "", // suggested in the "Save as" screen, e.g. "kavindu-finance-2026-11-06.csv"
     val isExporting: Boolean = false,
     val exportResult: ExportResult? = null,
+    // Appearance (saved on this phone only)
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
 )
 
 @HiltViewModel
@@ -57,12 +60,16 @@ class SettingsViewModel @Inject constructor(
     private val reminderSettingsRepository: ReminderSettingsRepository,
     private val reminderScheduler: ReminderScheduler,
     private val csvExportRepository: CsvExportRepository,
+    private val themeRepository: ThemeRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState(exportFileName = "kavindu-finance-${LocalDate.now()}.csv"))
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            themeRepository.mode.collect { mode -> _uiState.update { it.copy(themeMode = mode) } }
+        }
         viewModelScope.launch {
             reminderSettingsRepository.settings.collect { settings ->
                 _uiState.update {
@@ -103,6 +110,9 @@ class SettingsViewModel @Inject constructor(
             }
         }
     }
+
+    /** System, Light or Dark. The whole app switches straight away (MainActivity follows the same repository). */
+    fun onThemeSelected(mode: ThemeMode) = themeRepository.setMode(mode)
 
     /** The switch was turned on or off. On Android 13+ the screen asks for the notification permission first. */
     fun onReminderToggled(enabled: Boolean) {
