@@ -52,7 +52,12 @@ data class HistoryRow(
 
 enum class DayKind { TODAY, YESTERDAY, OTHER }
 
-data class HistoryDay(val kind: DayKind, val dateText: String, val rows: List<HistoryRow>)
+data class HistoryDay(
+    val key: String, // the ISO date, unique even across years (used as the list key)
+    val kind: DayKind,
+    val dateText: String, // "5 Nov", or "5 Nov 2025" for another year
+    val rows: List<HistoryRow>,
+)
 
 /** The entry just deleted, so the screen can offer Undo. */
 data class DeletedEntry(val expense: Expense)
@@ -69,6 +74,11 @@ data class HistoryUiState(
     val savedOutcome: SaveOutcome? = null, // set after quick-add saved; the screen shows its message once
     val deleted: DeletedEntry? = null, // set after a delete; the screen shows "Deleted · Undo" once
     val actionError: AppError? = null, // a confirm, delete or undo that could not be started
+    // Search and filters (nothing saved)
+    val query: String = "",
+    val type: HistoryType = HistoryType.ALL,
+    val isAllCycles: Boolean = false, // then the switcher shows "All cycles" and has no arrows
+    val isFiltered: Boolean = false, // an empty list then means "no matches", not "nothing recorded"
 ) {
     val isEmpty: Boolean get() = days.isEmpty()
 }
@@ -92,6 +102,7 @@ class HistoryViewModel @Inject constructor(
 
     // 0 = this cycle, -1 = the one before, and so on.
     private val cycleOffset = MutableStateFlow(0)
+    private val filter = MutableStateFlow(HistoryFilter())
     private var expensesById: Map<String, Expense> = emptyMap()
     private var loadJob: Job? = null
 
@@ -107,17 +118,21 @@ class HistoryViewModel @Inject constructor(
             .map { (it?.cycleStartDay ?: PayCycle.DEFAULT_START_DAY).coerceIn(PayCycle.MIN_START_DAY, PayCycle.MAX_START_DAY) }
             .distinctUntilChanged()
 
+        val allCycles = filter.map { it.allCycles }.distinctUntilChanged()
+
         loadJob = viewModelScope.launch {
-            combine(startDays, cycleOffset) { startDay, offset -> cycleFor(startDay, offset) to offset }
-                .flatMapLatest { (cycle, offset) ->
+            combine(startDays, cycleOffset, allCycles) { startDay, offset, all -> Triple(cycleFor(startDay, offset), offset, all) }
+                .flatMapLatest { (cycle, offset, all) ->
+                    // "All cycles" reads every entry from Room; otherwise only the cycle on screen.
                     combine(
-                        expenseRepository.observeExpenses(cycle),
-                        incomeRepository.observeIncomes(cycle),
+                        if (all) expenseRepository.observeExpensesSince(ALL_TIME) else expenseRepository.observeExpenses(cycle),
+                        if (all) incomeRepository.observeIncomesSince(ALL_TIME) else incomeRepository.observeIncomes(cycle),
                         categoryRepository.observeCategories(),
                         recurringRepository.observeRecurringItems(),
-                    ) { expenses, incomes, categories, items ->
+                        filter,
+                    ) { expenses, incomes, categories, items, currentFilter ->
                         expensesById = expenses.associateBy { it.id }
-                        build(cycle, offset, expenses, incomes, categories, items)
+                        build(cycle, offset, expenses, incomes, categories, items, currentFilter)
                     }
                 }
                 .catch { error -> _uiState.update { it.copy(isLoading = false, loadError = error.asAppError()) } }
@@ -142,6 +157,29 @@ class HistoryViewModel @Inject constructor(
     fun onPreviousCycleClicked() = cycleOffset.update { it - 1 }
 
     fun onNextCycleClicked() = cycleOffset.update { (it + 1).coerceAtMost(0) }
+
+    // ---- search and filters ----
+
+    fun onSearchChanged(text: String) = setFilter(filter.value.copy(query = text.take(MAX_QUERY_LENGTH)))
+
+    fun onTypeSelected(type: HistoryType) = setFilter(filter.value.copy(type = type))
+
+    fun onAllCyclesToggled() = setFilter(filter.value.copy(allCycles = !filter.value.allCycles))
+
+    fun onClearFiltersClicked() = setFilter(HistoryFilter())
+
+    // The screen shows the filter straight away; the list follows as soon as the new rows are built.
+    private fun setFilter(newFilter: HistoryFilter) {
+        filter.value = newFilter
+        _uiState.update {
+            it.copy(
+                query = newFilter.query,
+                type = newFilter.type,
+                isAllCycles = newFilter.allCycles,
+                isFiltered = newFilter.isActive,
+            )
+        }
+    }
 
     // ---- quick add (the same sheet as on the dashboard) ----
 
@@ -214,32 +252,38 @@ class HistoryViewModel @Inject constructor(
         incomes: List<Income>,
         categories: List<Category>,
         items: List<RecurringItem>,
+        activeFilter: HistoryFilter,
     ): Built {
         val namesById = categories.associate { it.id to it.name }
         val today = LocalDate.now()
 
-        val expenseRows = expenses.map { it.date to it.toRow(namesById, items) }
-        val incomeRows = incomes.map { it.date to it.toRow() }
+        // Filter first, so the list and the Spent / Received totals both show only what matches.
+        val shownExpenses = expenses.filter { HistoryFilterRules.matches(it, namesById[it.categoryId], activeFilter) }
+        val shownIncomes = incomes.filter { HistoryFilterRules.matches(it, activeFilter) }
+
+        val expenseRows = shownExpenses.map { it.date to it.toRow(namesById, items) }
+        val incomeRows = shownIncomes.map { it.date to it.toRow() }
         val days = (expenseRows + incomeRows)
             .groupBy({ it.first }, { it.second })
             .toSortedMap(compareByDescending<LocalDate> { it })
             .map { (date, rows) ->
                 HistoryDay(
+                    key = date.toString(),
                     kind = when (date) {
                         today -> DayKind.TODAY
                         today.minusDays(1) -> DayKind.YESTERDAY
                         else -> DayKind.OTHER
                     },
-                    dateText = date.format(DAY_MONTH),
+                    dateText = date.format(if (date.year == today.year) DAY_MONTH else DAY_MONTH_YEAR),
                     rows = rows,
                 )
             }
 
         return Built(
-            cycleLabel = "${cycle.start.format(DAY_MONTH)} – ${cycle.end.format(DAY_MONTH)}",
+            cycleLabel = if (activeFilter.allCycles) "" else "${cycle.start.format(DAY_MONTH)} – ${cycle.end.format(DAY_MONTH)}",
             isCurrentCycle = offset == 0,
-            spent = Money.formatLkr(expenses.sumOf { it.amountCents }),
-            received = Money.formatLkr(incomes.sumOf { it.lkrAmountCents }),
+            spent = Money.formatLkr(shownExpenses.sumOf { it.amountCents }),
+            received = Money.formatLkr(shownIncomes.sumOf { it.lkrAmountCents }),
             days = days,
         )
     }
@@ -279,5 +323,10 @@ class HistoryViewModel @Inject constructor(
 
     private companion object {
         val DAY_MONTH: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM")
+        val DAY_MONTH_YEAR: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy")
+
+        // "Every entry": Room compares dates as ISO text, and every entry in the app is dated after 2000.
+        val ALL_TIME: LocalDate = LocalDate.of(2000, 1, 1)
+        const val MAX_QUERY_LENGTH = 100
     }
 }

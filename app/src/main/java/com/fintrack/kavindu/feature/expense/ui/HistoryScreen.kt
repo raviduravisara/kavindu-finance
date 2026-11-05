@@ -1,25 +1,34 @@
 package com.fintrack.kavindu.feature.expense.ui
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -35,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -50,6 +60,7 @@ import com.fintrack.kavindu.feature.expense.viewmodel.DayKind
 import com.fintrack.kavindu.feature.expense.viewmodel.HistoryDay
 import com.fintrack.kavindu.feature.expense.viewmodel.HistoryRow
 import com.fintrack.kavindu.feature.expense.viewmodel.HistoryRowKind
+import com.fintrack.kavindu.feature.expense.viewmodel.HistoryType
 import com.fintrack.kavindu.feature.expense.viewmodel.HistoryUiState
 import com.fintrack.kavindu.feature.expense.viewmodel.HistoryViewModel
 import com.fintrack.kavindu.feature.income.ui.labelRes as incomeSourceLabelRes
@@ -135,6 +146,10 @@ fun HistoryScreen(
                 onDeleteClicked = viewModel::onDeleteClicked,
                 onConfirmClicked = viewModel::onConfirmEstimateClicked,
                 onAddExpenseClicked = viewModel::onAddExpenseClicked,
+                onSearchChanged = viewModel::onSearchChanged,
+                onTypeSelected = viewModel::onTypeSelected,
+                onAllCyclesToggled = viewModel::onAllCyclesToggled,
+                onClearFiltersClicked = viewModel::onClearFiltersClicked,
                 modifier = Modifier.padding(innerPadding),
             )
         }
@@ -155,11 +170,23 @@ private fun HistoryContent(
     onDeleteClicked: (String) -> Unit,
     onConfirmClicked: (String) -> Unit,
     onAddExpenseClicked: () -> Unit,
+    onSearchChanged: (String) -> Unit,
+    onTypeSelected: (HistoryType) -> Unit,
+    onAllCyclesToggled: () -> Unit,
+    onClearFiltersClicked: () -> Unit,
     modifier: Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         CycleSwitcher(uiState, onPreviousCycleClicked, onNextCycleClicked)
-        if (uiState.isEmpty) {
+        FilterBar(uiState, onSearchChanged, onTypeSelected, onAllCyclesToggled)
+        if (uiState.isEmpty && uiState.isFiltered) {
+            EmptyState(
+                message = stringResource(R.string.history_no_matches),
+                actionLabel = stringResource(R.string.history_clear_filters),
+                onAction = onClearFiltersClicked,
+                modifier = Modifier.weight(1f),
+            )
+        } else if (uiState.isEmpty) {
             EmptyState(
                 message = stringResource(R.string.history_empty),
                 actionLabel = stringResource(R.string.history_add_expense),
@@ -174,7 +201,7 @@ private fun HistoryContent(
                 verticalArrangement = Arrangement.spacedBy(Dimens.CardGap),
             ) {
                 uiState.days.forEach { day ->
-                    item(key = "day-${day.dateText}-${day.kind}") { DayHeader(day) }
+                    item(key = "day-${day.key}") { DayHeader(day) }
                     items(day.rows, key = { "${it.kind}-${it.id}" }) { row ->
                         HistoryRowCard(
                             row = row,
@@ -198,11 +225,19 @@ private fun CycleSwitcher(uiState: HistoryUiState, onPreviousClicked: () -> Unit
             .padding(horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconButton(onClick = onPreviousClicked) {
-            Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.history_previous_cycle))
+        // With "All cycles" on there is nothing to step through, so the arrows make room and disappear.
+        if (uiState.isAllCycles) {
+            Spacer(modifier = Modifier.size(48.dp))
+        } else {
+            IconButton(onClick = onPreviousClicked) {
+                Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.history_previous_cycle))
+            }
         }
         Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = uiState.cycleLabel, style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = if (uiState.isAllCycles) stringResource(R.string.history_all_cycles) else uiState.cycleLabel,
+                style = MaterialTheme.typography.titleMedium,
+            )
             Text(
                 text = "${stringResource(R.string.history_spent, uiState.spent)} · ${stringResource(R.string.history_received, uiState.received)}",
                 style = MaterialTheme.typography.bodySmall,
@@ -210,10 +245,73 @@ private fun CycleSwitcher(uiState: HistoryUiState, onPreviousClicked: () -> Unit
                 textAlign = TextAlign.Center,
             )
         }
-        IconButton(onClick = onNextClicked, enabled = !uiState.isCurrentCycle) {
-            Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.history_next_cycle))
+        if (uiState.isAllCycles) {
+            Spacer(modifier = Modifier.size(48.dp))
+        } else {
+            IconButton(onClick = onNextClicked, enabled = !uiState.isCurrentCycle) {
+                Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.history_next_cycle))
+            }
         }
     }
+}
+
+// Search box and filter chips (E2). The list and the totals above follow them; nothing is saved.
+@Composable
+private fun FilterBar(
+    uiState: HistoryUiState,
+    onSearchChanged: (String) -> Unit,
+    onTypeSelected: (HistoryType) -> Unit,
+    onAllCyclesToggled: () -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        OutlinedTextField(
+            value = uiState.query,
+            onValueChange = onSearchChanged,
+            placeholder = { Text(stringResource(R.string.history_search_hint)) },
+            leadingIcon = { Icon(imageVector = Icons.Filled.Search, contentDescription = null) },
+            trailingIcon = {
+                if (uiState.query.isNotEmpty()) {
+                    IconButton(onClick = { onSearchChanged("") }) {
+                        Icon(imageVector = Icons.Filled.Close, contentDescription = stringResource(R.string.history_search_clear))
+                    }
+                }
+            },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Dimens.ScreenPadding),
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = Dimens.ScreenPadding),
+            horizontalArrangement = Arrangement.spacedBy(Dimens.ChipGap),
+        ) {
+            FilterChip(
+                selected = uiState.isAllCycles,
+                onClick = onAllCyclesToggled,
+                label = { Text(stringResource(R.string.history_all_cycles)) },
+            )
+            HistoryType.entries.forEach { type ->
+                FilterChip(
+                    selected = uiState.type == type,
+                    onClick = { onTypeSelected(type) },
+                    label = { Text(stringResource(type.labelRes())) },
+                )
+            }
+        }
+    }
+}
+
+private fun HistoryType.labelRes(): Int = when (this) {
+    HistoryType.ALL -> R.string.history_filter_all
+    HistoryType.EXPENSES -> R.string.history_filter_expenses
+    HistoryType.INCOME -> R.string.history_filter_income
+    HistoryType.COMMITTED -> R.string.history_committed
+    HistoryType.DISCRETIONARY -> R.string.history_discretionary
+    HistoryType.UNRECORDED -> R.string.history_unrecorded
 }
 
 @Composable
