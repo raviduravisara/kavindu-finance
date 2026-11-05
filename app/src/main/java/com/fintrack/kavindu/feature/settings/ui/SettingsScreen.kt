@@ -39,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -52,6 +53,7 @@ import com.fintrack.kavindu.core.ui.theme.Dimens
 import com.fintrack.kavindu.core.ui.theme.KavinduFinanceTheme
 import com.fintrack.kavindu.core.util.PayCycle
 import com.fintrack.kavindu.feature.reminder.ui.ReminderNotification
+import com.fintrack.kavindu.feature.settings.viewmodel.ExportResult
 import com.fintrack.kavindu.feature.settings.viewmodel.SettingsMessage
 import com.fintrack.kavindu.feature.settings.viewmodel.SettingsUiState
 import com.fintrack.kavindu.feature.settings.viewmodel.SettingsViewModel
@@ -69,6 +71,11 @@ fun SettingsScreen(
     val notificationPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
         viewModel::onNotificationPermissionResult,
+    )
+    // Android's own "Save as" screen: no storage permission needed, works from Android 8.0.
+    val exportFilePicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("text/csv"),
+        viewModel::onExportFileChosen,
     )
     Scaffold(
         topBar = { AppTopBar(title = stringResource(R.string.settings_title), onBackClicked = onBackClicked) },
@@ -91,6 +98,7 @@ fun SettingsScreen(
                 onReminderTimeClicked = viewModel::onReminderTimeClicked,
                 onReminderTimeSelected = viewModel::onReminderTimeSelected,
                 onReminderTimeDismissed = viewModel::onReminderTimeDismissed,
+                onExportClicked = { exportFilePicker.launch(uiState.exportFileName) },
                 onLogoutClicked = viewModel::onLogoutClicked,
                 onLogoutConfirmed = viewModel::onLogoutConfirmed,
                 onLogoutDismissed = viewModel::onLogoutDismissed,
@@ -109,6 +117,7 @@ private fun SettingsContent(
     onReminderTimeClicked: () -> Unit,
     onReminderTimeSelected: (hour: Int, minute: Int) -> Unit,
     onReminderTimeDismissed: () -> Unit,
+    onExportClicked: () -> Unit,
     onLogoutClicked: () -> Unit,
     onLogoutConfirmed: () -> Unit,
     onLogoutDismissed: () -> Unit,
@@ -163,6 +172,8 @@ private fun SettingsContent(
             onReminderToggled = onReminderToggled,
             onReminderTimeClicked = onReminderTimeClicked,
         )
+
+        ExportCard(uiState = uiState, onExportClicked = onExportClicked)
 
         // Same prompt card as the dashboard's weekly check-in (UI spec, section 2).
         PromptCard {
@@ -235,6 +246,39 @@ private fun ReminderCard(
         if (uiState.isReminderPermissionNoteVisible) {
             Text(
                 text = stringResource(R.string.reminder_permission_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+// CSV export: explanation, one button, and what the last export did.
+@Composable
+private fun ExportCard(uiState: SettingsUiState, onExportClicked: () -> Unit) {
+    StandardCard {
+        Text(text = stringResource(R.string.export_title), style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = stringResource(R.string.export_description),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = onExportClicked,
+            enabled = !uiState.isExporting,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(stringResource(if (uiState.isExporting) R.string.export_in_progress else R.string.export_button))
+        }
+        val resultText = when (val result = uiState.exportResult) {
+            is ExportResult.Exported -> pluralStringResource(R.plurals.export_done, result.count, result.count)
+            ExportResult.Failed -> stringResource(R.string.export_failed)
+            null -> null
+        }
+        if (resultText != null) {
+            Text(
+                text = resultText,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -320,6 +364,7 @@ private fun SettingsPreview() {
             onReminderTimeClicked = {},
             onReminderTimeSelected = { _, _ -> },
             onReminderTimeDismissed = {},
+            onExportClicked = {},
             onLogoutClicked = {},
             onLogoutConfirmed = {},
             onLogoutDismissed = {},
