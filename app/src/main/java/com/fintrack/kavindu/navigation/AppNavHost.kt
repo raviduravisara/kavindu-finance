@@ -8,9 +8,7 @@ import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -34,8 +32,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.fintrack.kavindu.AppMessages
 import com.fintrack.kavindu.R
-import com.fintrack.kavindu.core.ui.components.AppTopBar
-import com.fintrack.kavindu.core.ui.components.EmptyState
 import com.fintrack.kavindu.core.ui.components.LoadingState
 import com.fintrack.kavindu.feature.auth.ui.ForgotPasswordScreen
 import com.fintrack.kavindu.feature.auth.ui.LoginScreen
@@ -44,12 +40,17 @@ import com.fintrack.kavindu.feature.auth.viewmodel.SessionUiState
 import com.fintrack.kavindu.feature.auth.viewmodel.SessionViewModel
 import com.fintrack.kavindu.feature.balancecheck.ui.BalanceCheckScreen
 import com.fintrack.kavindu.feature.crypto.ui.CryptoScreen
+import com.fintrack.kavindu.feature.dashboard.ui.DashboardScreen
+import com.fintrack.kavindu.feature.expense.ui.CategoriesScreen
+import com.fintrack.kavindu.feature.expense.ui.EditExpenseScreen
+import com.fintrack.kavindu.feature.expense.ui.HistoryScreen
 import com.fintrack.kavindu.feature.freelance.ui.FreelanceProjectDetailScreen
 import com.fintrack.kavindu.feature.freelance.ui.FreelanceProjectsScreen
 import com.fintrack.kavindu.feature.goal.ui.EditGoalScreen
 import com.fintrack.kavindu.feature.goal.ui.GoalScreen
 import com.fintrack.kavindu.feature.income.ui.EditIncomeScreen
 import com.fintrack.kavindu.feature.income.ui.IncomeListScreen
+import com.fintrack.kavindu.feature.recurring.ui.RecurringScreen
 import com.fintrack.kavindu.feature.settings.ui.SettingsScreen
 
 // The four main screens in the bottom NavigationBar (UI spec, "App frame"): icon above label.
@@ -110,11 +111,14 @@ fun AppNavHost(
                     ForgotPasswordScreen(onBackToLoginClicked = { navController.popBackStack() })
                 }
 
-                // Placeholders until Member 3's dashboard and Member 2's and 3's tab screens exist.
+                // Member 3: dashboard. Quick-add is a bottom sheet over it, so it has no route of its own.
                 composable<Dashboard> {
-                    DashboardPlaceholder(
+                    DashboardScreen(
                         onSettingsClicked = { navController.navigate(Settings) },
                         onCheckInClicked = { navController.navigate(WeeklyBalanceCheck) },
+                        onGoalClicked = { navController.openTab(TopLevelTab.GOAL) },
+                        onOverdueInvoicesClicked = { navController.navigate(FreelanceProjects) },
+                        onSubscriptionsClicked = { navController.navigate(RecurringItems) },
                     )
                 }
                 // Member 2: income
@@ -146,8 +150,26 @@ fun AppNavHost(
                 composable<Crypto> {
                     CryptoScreen(onBackClicked = { navController.popBackStack() })
                 }
+                // Member 3: history, edit expense, categories, recurring items (with the subscription review)
                 composable<TransactionHistory> {
-                    TabPlaceholder(R.string.nav_history, R.string.placeholder_history) { navController.openTab(TopLevelTab.HOME) }
+                    HistoryScreen(
+                        onExpenseClicked = { expenseId -> navController.navigate(EditExpense(expenseId)) },
+                        onIncomeClicked = { incomeId -> navController.navigate(EditIncome(incomeId)) },
+                        onRecurringClicked = { navController.navigate(RecurringItems) },
+                        onCategoriesClicked = { navController.navigate(Categories) },
+                    )
+                }
+                composable<EditExpense> {
+                    EditExpenseScreen(
+                        onBackClicked = { navController.popBackStack() },
+                        onDone = { navController.popBackStack() },
+                    )
+                }
+                composable<Categories> {
+                    CategoriesScreen(onBackClicked = { navController.popBackStack() })
+                }
+                composable<RecurringItems> {
+                    RecurringScreen(onBackClicked = { navController.popBackStack() })
                 }
                 // Member 2: goal
                 composable<GoalOverview> {
@@ -199,43 +221,5 @@ private fun AppNavigationBar(currentTab: TopLevelTab, onTabSelected: (TopLevelTa
                 label = { Text(stringResource(tab.label)) },
             )
         }
-    }
-}
-
-// Temporary. The real dashboard (Member 3) keeps the same top bar: wallet mark, "This cycle", ⋮ → Settings.
-@Composable
-private fun DashboardPlaceholder(onSettingsClicked: () -> Unit, onCheckInClicked: () -> Unit) {
-    Scaffold(
-        topBar = {
-            AppTopBar(
-                title = stringResource(R.string.dashboard_title),
-                appIcon = Icons.Filled.AccountBalanceWallet,
-                actions = {
-                    IconButton(onClick = onSettingsClicked) {
-                        Icon(imageVector = Icons.Filled.MoreVert, contentDescription = stringResource(R.string.action_settings))
-                    }
-                },
-            )
-        },
-    ) { innerPadding ->
-        EmptyState(
-            message = stringResource(R.string.placeholder_dashboard),
-            actionLabel = stringResource(R.string.placeholder_dashboard_action),
-            onAction = onCheckInClicked,
-            modifier = Modifier.padding(innerPadding),
-        )
-    }
-}
-
-// Temporary screen for a tab whose real screen is not built yet.
-@Composable
-private fun TabPlaceholder(@StringRes title: Int, @StringRes message: Int, onBackToHomeClicked: () -> Unit) {
-    Scaffold(topBar = { AppTopBar(title = stringResource(title)) }) { innerPadding ->
-        EmptyState(
-            message = stringResource(message),
-            actionLabel = stringResource(R.string.placeholder_back_home),
-            onAction = onBackToHomeClicked,
-            modifier = Modifier.padding(innerPadding),
-        )
     }
 }
