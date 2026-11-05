@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- CSV export card in Settings (feature/settings). -->
+<resources>
+    <string name="export_title">Export your data</string>
+    <string name="export_description">Saves all your income and expenses as a CSV file you can open in Excel or Google Sheets. Crypto transfers and freelance milestones are not included.</string>
+    <string name="export_button">Export to CSV</string>
+    <string name="export_in_progress">Exporting…</string>
+    <plurals name="export_done">
+        <item quantity="one">Exported %1$d entry.</item>
+        <item quantity="other">Exported %1$d entries.</item>
+    </plurals>
+    <string name="export_failed">The file could not be saved. Try again, or choose another place to save it.</string>
+</resources>

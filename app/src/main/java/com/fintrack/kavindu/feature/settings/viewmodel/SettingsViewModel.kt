@@ -1,5 +1,6 @@
 package com.fintrack.kavindu.feature.settings.viewmodel
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fintrack.kavindu.core.data.repository.AuthRepository
@@ -8,6 +9,7 @@ import com.fintrack.kavindu.core.util.PayCycle
 import com.fintrack.kavindu.feature.reminder.data.ReminderScheduler
 import com.fintrack.kavindu.feature.reminder.data.ReminderSettingsRepository
 import com.fintrack.kavindu.feature.reminder.viewmodel.ReminderTime
+import com.fintrack.kavindu.feature.settings.data.CsvExportRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +23,12 @@ import java.time.format.FormatStyle
 import javax.inject.Inject
 
 enum class SettingsMessage { SAVED, SAVE_FAILED }
+
+/** What the last CSV export did. */
+sealed interface ExportResult {
+    data class Exported(val count: Int) : ExportResult
+    data object Failed : ExportResult
+}
 
 data class SettingsUiState(
     val isLoading: Boolean = true,
@@ -36,6 +44,10 @@ data class SettingsUiState(
     val reminderTimeText: String = "", // e.g. "8:00 PM"
     val isReminderTimeDialogVisible: Boolean = false,
     val isReminderPermissionNoteVisible: Boolean = false,
+    // CSV export
+    val exportFileName: String = "", // suggested in the "Save as" screen, e.g. "kavindu-finance-2026-11-06.csv"
+    val isExporting: Boolean = false,
+    val exportResult: ExportResult? = null,
 )
 
 @HiltViewModel
@@ -44,9 +56,10 @@ class SettingsViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val reminderSettingsRepository: ReminderSettingsRepository,
     private val reminderScheduler: ReminderScheduler,
+    private val csvExportRepository: CsvExportRepository,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(SettingsUiState())
+    private val _uiState = MutableStateFlow(SettingsUiState(exportFileName = "kavindu-finance-${LocalDate.now()}.csv"))
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     init {
@@ -113,6 +126,21 @@ class SettingsViewModel @Inject constructor(
     fun onReminderTimeSelected(hour: Int, minute: Int) {
         _uiState.update { it.copy(isReminderTimeDialogVisible = false) }
         reminderScheduler.update(reminderSettingsRepository.current().copy(time = LocalTime.of(hour, minute)))
+    }
+
+    /** The file chosen in Android's "Save as" screen, or null when he backed out (then nothing happens). */
+    fun onExportFileChosen(uri: Uri?) {
+        if (uri == null || _uiState.value.isExporting) return
+        _uiState.update { it.copy(isExporting = true, exportResult = null) }
+        viewModelScope.launch {
+            val result = csvExportRepository.exportTo(uri)
+            _uiState.update {
+                it.copy(
+                    isExporting = false,
+                    exportResult = result.fold(onSuccess = { count -> ExportResult.Exported(count) }, onFailure = { ExportResult.Failed }),
+                )
+            }
+        }
     }
 
     fun onLogoutClicked() = _uiState.update { it.copy(isLogoutDialogVisible = true) }
