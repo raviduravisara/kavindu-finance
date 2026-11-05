@@ -16,10 +16,14 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -55,18 +59,25 @@ import com.fintrack.kavindu.feature.settings.ui.SettingsScreen
 
 // The four main screens in the bottom NavigationBar (UI spec, "App frame"): icon above label.
 private enum class TopLevelTab(val route: Any, @StringRes val label: Int, val icon: ImageVector) {
-    HOME(Dashboard, R.string.nav_home, Icons.Filled.Home),
+    HOME(Dashboard(), R.string.nav_home, Icons.Filled.Home),
     INCOME(IncomeList, R.string.nav_income, Icons.Filled.AccountBalanceWallet),
     HISTORY(TransactionHistory, R.string.nav_history, Icons.Filled.History),
     GOAL(GoalOverview, R.string.nav_goal, Icons.Filled.Flag),
 }
 
+/**
+ * @param quickAddRequests grows by one each time the home-screen widget's "Add expense" is tapped
+ * (counted in MainActivity). Each new request opens the Dashboard with the quick-add sheet once.
+ */
 @Composable
 fun AppNavHost(
+    quickAddRequests: Int = 0,
     sessionViewModel: SessionViewModel = hiltViewModel(),
 ) {
     val sessionState by sessionViewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    // How many quick-add requests were already handled. Saved, so a rotation never handles one twice.
+    var handledQuickAddRequests by rememberSaveable { mutableIntStateOf(0) }
 
     if (sessionState == SessionUiState.Loading) {
         LoadingState()
@@ -81,6 +92,18 @@ fun AppNavHost(
         val currentDestination = navController.currentBackStackEntryAsState().value?.destination
         val currentTab = TopLevelTab.entries.firstOrNull { currentDestination?.hasRoute(it.route::class) == true }
 
+        // Widget "Add expense": open the Dashboard with the quick-add sheet. Signed out: ignored, Login shows.
+        LaunchedEffect(quickAddRequests, isSignedIn) {
+            if (quickAddRequests > handledQuickAddRequests) {
+                handledQuickAddRequests = quickAddRequests
+                if (isSignedIn) {
+                    navController.navigate(Dashboard(openQuickAdd = true)) {
+                        popUpTo<Dashboard> { inclusive = true }
+                    }
+                }
+            }
+        }
+
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) }, // above the NavigationBar
             bottomBar = {
@@ -92,7 +115,7 @@ fun AppNavHost(
         ) { innerPadding ->
             NavHost(
                 navController = navController,
-                startDestination = if (isSignedIn) Dashboard else Login,
+                startDestination = if (isSignedIn) Dashboard() else Login,
                 // consumeWindowInsets: each screen's own top bar does not add the status bar space again.
                 modifier = Modifier
                     .padding(innerPadding)

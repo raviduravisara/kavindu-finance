@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
 @Serializable data object Crypto
 
 // Member 3: dashboard, expenses, categories, recurring
-@Serializable data object Dashboard
+@Serializable data class Dashboard(val openQuickAdd: Boolean = false) // true = open with the quick-add sheet (widget)
 @Serializable data object TransactionHistory
 @Serializable data class EditExpense(val expenseId: String)
 @Serializable data object Categories

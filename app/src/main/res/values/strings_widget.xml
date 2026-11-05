@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home-screen quick-add widget (feature/widget). -->
+<resources>
+    <string name="widget_name">Safe to spend and quick add</string>
+    <string name="widget_description">What you can spend today, and a one-tap Add expense button.</string>
+    <string name="widget_safe_today">Safe to spend today</string>
+    <string name="widget_safe_cycle">Safe to spend this cycle</string>
+    <string name="widget_open_app">Open Kavindu Finance to start</string>
+    <string name="widget_add_expense">Add expense</string>
+</resources>
