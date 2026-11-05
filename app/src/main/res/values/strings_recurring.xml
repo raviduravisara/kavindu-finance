@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Member 3: recurring items and the subscription review. Kept in its own file so it never conflicts with the shared strings.xml. -->
+<resources>
+    <string name="recurring_title">Recurring</string>
+    <string name="recurring_add">Add recurring item</string>
+    <string name="recurring_edit">Edit recurring item</string>
+    <string name="recurring_empty">Add rent, gym and subscriptions once, and the app records them for you every month.</string>
+
+    <string name="recurring_subscriptions_title">Subscriptions</string>
+    <!-- e.g. "LKR 1,799 a month · LKR 21,588 a year" -->
+    <string name="recurring_subscriptions_cost">%1$s a month · %2$s a year</string>
+    <string name="recurring_still_using">Still using this?</string>
+    <string name="recurring_yes">Still using it</string>
+    <string name="recurring_pause">Not anymore</string>
+    <string name="recurring_last_checked">Checked %1$s</string>
+    <string name="recurring_never_checked">Not checked yet</string>
+    <string name="recurring_pause_help">If it is not needed, pause it here and cancel it with the provider too, so the charges stop.</string>
+
+    <string name="recurring_bills_title">Bills and regular payments</string>
+    <string name="recurring_paused_title">Paused</string>
+    <string name="recurring_resume">Resume</string>
+    <!-- e.g. "Rent · every month on day 25" -->
+    <string name="recurring_row_detail_schedule">Every month on day %1$d</string>
+    <string name="recurring_row_detail_category">%1$s · %2$s</string>
+    <string name="recurring_estimate_tag">Estimate</string>
+
+    <!-- Add / edit form -->
+    <string name="recurring_name_label">Name</string>
+    <string name="recurring_name_placeholder">e.g. Rent, Gym, Netflix</string>
+    <string name="recurring_amount_label">Amount (LKR)</string>
+    <string name="recurring_day_label">Day of the month (1 to 28)</string>
+    <string name="recurring_category_label">Category</string>
+    <string name="recurring_estimate_switch">The amount changes each month</string>
+    <string name="recurring_estimate_help">Added as an estimate that you confirm in History, for bills such as utilities.</string>
+    <string name="recurring_subscription_switch">This is a subscription</string>
+    <string name="recurring_active_switch">Add it every month</string>
+    <string name="recurring_save">Save</string>
+    <string name="recurring_delete">Delete</string>
+    <string name="recurring_delete_title">Delete this item?</string>
+    <string name="recurring_delete_text">It will stop being added. What it already added stays in History.</string>
+    <string name="recurring_error_name_required">Give it a name.</string>
+    <string name="recurring_error_name_too_long">Use 100 characters or fewer.</string>
+    <string name="recurring_error_amount">Enter an amount above 0, with up to 2 decimals.</string>
+    <string name="recurring_error_day">Enter a day from 1 to 28.</string>
+    <string name="recurring_error_category">Pick a category.</string>
+</resources>

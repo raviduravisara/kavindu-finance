@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Member 3: quick-add, history, edit expense and categories. Kept in its own file so it never conflicts with the shared strings.xml. -->
+<resources>
+    <string name="expense_ok">OK</string>
+
+    <!-- Quick-add sheet (wireframe 2) -->
+    <string name="quickadd_title">Add expense</string>
+    <string name="quickadd_date_today">Today</string>
+    <string name="quickadd_date_change">Change the date</string>
+    <string name="quickadd_amount_label">Amount (LKR)</string>
+    <string name="quickadd_category_label">Category</string>
+    <string name="quickadd_paid_with">Paid with</string>
+    <string name="quickadd_save">Save</string>
+    <string name="quickadd_backspace">Delete the last digit</string>
+    <string name="quickadd_no_categories">Your categories are still loading. Check your connection and try again in a moment.</string>
+    <!-- Snackbar after saving. The goal message is calm and neutral, never a warning (NFR-09). -->
+    <string name="quickadd_saved">Saved.</string>
+    <string name="quickadd_saved_goal_one">Saved. This moves your %1$s date by about 1 day.</string>
+    <string name="quickadd_saved_goal_many">Saved. This moves your %1$s date by about %2$d days.</string>
+
+    <!-- History (feature/expense) -->
+    <string name="history_title">History</string>
+    <string name="history_recurring">Recurring items</string>
+    <string name="history_categories">Categories</string>
+    <string name="history_previous_cycle">Previous pay cycle</string>
+    <string name="history_next_cycle">Next pay cycle</string>
+    <string name="history_spent">Spent %1$s</string>
+    <string name="history_received">Received %1$s</string>
+    <string name="history_empty">Nothing recorded in this pay cycle yet. Add an expense to get started.</string>
+    <string name="history_add_expense">Add expense</string>
+    <string name="history_today">Today</string>
+    <string name="history_yesterday">Yesterday</string>
+    <string name="history_expense_fallback">Expense</string>
+    <string name="history_unrecorded">Unrecorded spending</string>
+    <string name="history_unrecorded_detail">Found by your weekly check-in</string>
+    <string name="history_committed">Committed</string>
+    <string name="history_discretionary">Discretionary</string>
+    <string name="history_estimate">Estimate</string>
+    <string name="history_confirm">Confirm</string>
+    <string name="history_delete">Delete</string>
+    <string name="history_deleted">Deleted.</string>
+    <string name="history_undo">Undo</string>
+
+    <!-- Edit expense -->
+    <string name="editexpense_title">Edit expense</string>
+    <string name="editexpense_amount_label">Amount (LKR)</string>
+    <string name="editexpense_category_label">Category</string>
+    <string name="editexpense_channel_label">Paid with</string>
+    <string name="editexpense_account_label">Account</string>
+    <string name="editexpense_date_label">Date</string>
+    <string name="editexpense_note_label">Note (optional)</string>
+    <string name="editexpense_save">Save</string>
+    <string name="editexpense_delete">Delete</string>
+    <string name="editexpense_delete_title">Delete this expense?</string>
+    <string name="editexpense_delete_text">It will be removed from this cycle\'s totals.</string>
+    <string name="editexpense_estimate_note">This is an estimate. Saving it confirms the amount.</string>
+    <string name="editexpense_date_locked">Added automatically each month, so its date stays as it is.</string>
+    <string name="editexpense_cannot_delete">Added automatically each month. To remove it, pause its recurring item first. You can still correct the amount here.</string>
+    <string name="editexpense_unrecorded_note">Found by your weekly check-in. Pick a category if you remember what it was.</string>
+    <string name="editexpense_error_amount">Enter an amount above 0, with up to 2 decimals.</string>
+    <string name="editexpense_error_category">Pick a category.</string>
+    <string name="editexpense_error_date_future">Pick today or an earlier day.</string>
+    <string name="editexpense_error_note_too_long">Use 500 characters or fewer.</string>
+
+    <!-- Categories (M4) -->
+    <string name="categories_title">Categories</string>
+    <string name="categories_committed">Committed</string>
+    <string name="categories_committed_help">Bills you have to pay</string>
+    <string name="categories_discretionary">Discretionary</string>
+    <string name="categories_discretionary_help">Spending you choose</string>
+    <string name="categories_empty">Your categories are still loading. Check your connection and try again in a moment.</string>
+    <string name="categories_add">Add category</string>
+    <string name="categories_edit">Edit category</string>
+    <string name="categories_name_label">Name</string>
+    <string name="categories_type_label">This is</string>
+    <string name="categories_flag_help">A change only applies to expenses you add from now on, so earlier months keep their totals.</string>
+    <string name="categories_save">Save</string>
+    <string name="categories_error_required">Give the category a name.</string>
+    <string name="categories_error_too_long">Use 100 characters or fewer.</string>
+    <string name="categories_error_duplicate">You already have a category with this name.</string>
+</resources>
