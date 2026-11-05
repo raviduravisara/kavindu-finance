@@ -9,7 +9,10 @@ import com.fintrack.kavindu.core.data.repository.IncomeRepository
 import com.fintrack.kavindu.core.data.repository.ProfileRepository
 import com.fintrack.kavindu.core.model.AppError
 import com.fintrack.kavindu.core.model.asAppError
+import com.fintrack.kavindu.core.util.Money
 import com.fintrack.kavindu.core.util.PayCycle
+import com.fintrack.kavindu.feature.goal.domain.GoalWhatIfCalculator
+import com.fintrack.kavindu.feature.goal.domain.WhatIfTiming
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -25,12 +28,27 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+import kotlin.math.roundToLong
 
 data class GoalUiState(
     val isLoading: Boolean = true,
     val loadError: AppError? = null,
     val details: GoalDetails? = null, // null after loading = no goal set yet
+    val whatIf: WhatIfState? = null, // null when the goal is reached or past its deadline
+)
+
+/** The "What if" card, already worked out and formatted. Nothing in it is saved. */
+data class WhatIfState(
+    val sliderValue: Float, // in steps of LKR 1,000
+    val sliderMax: Float,
+    val amount: String, // e.g. "LKR 45,000"
+    val target: String, // e.g. "LKR 490,000"
+    val pace: String?, // his average per completed cycle, e.g. "LKR 32,000"; null before the first full cycle
+    val finishMonth: String?, // e.g. "July 2027"; null when the amount is 0
+    val timing: WhatIfTiming?,
+    val months: Int, // months before or after the deadline month
 )
 
 /**
@@ -51,6 +69,9 @@ class GoalViewModel @Inject constructor(
     val uiState: StateFlow<GoalUiState> = _uiState.asStateFlow()
 
     private var loadJob: Job? = null
+
+    // The amount he chose on the "What if" slider; null until he moves it (then it starts at his pace).
+    private var whatIfAmountCents: Long? = null
 
     init {
         load()
@@ -83,9 +104,39 @@ class GoalViewModel @Inject constructor(
                     }
                 }
                 .catch { error -> _uiState.update { it.copy(isLoading = false, loadError = error.asAppError()) } }
-                .collect { details -> _uiState.value = GoalUiState(isLoading = false, details = details) }
+                .collect { details ->
+                    _uiState.value = GoalUiState(isLoading = false, details = details, whatIf = details?.let(::buildWhatIf))
+                }
         }
     }
 
     fun onRetryClicked() = load()
+
+    /** The slider moved; [value] counts steps of LKR 1,000. The finish month updates straight away. */
+    fun onWhatIfAmountChanged(value: Float) {
+        val details = _uiState.value.details ?: return
+        whatIfAmountCents = value.roundToLong() * GoalWhatIfCalculator.STEP_CENTS
+        _uiState.update { it.copy(whatIf = buildWhatIf(details)) }
+    }
+
+    private fun buildWhatIf(details: GoalDetails): WhatIfState? {
+        val input = details.whatIfInput ?: return null
+        val maxCents = GoalWhatIfCalculator.sliderMaxCents(input)
+        val amountCents = (whatIfAmountCents ?: GoalWhatIfCalculator.startingAmountCents(input)).coerceIn(0, maxCents)
+        val result = GoalWhatIfCalculator.finish(input, amountCents)
+        return WhatIfState(
+            sliderValue = (amountCents / GoalWhatIfCalculator.STEP_CENTS).toFloat(),
+            sliderMax = (maxCents / GoalWhatIfCalculator.STEP_CENTS).toFloat(),
+            amount = Money.formatLkr(amountCents),
+            target = details.target,
+            pace = if (input.averagePerCycleCents > 0) Money.formatLkr(input.averagePerCycleCents) else null,
+            finishMonth = result?.finish?.format(MONTH_YEAR),
+            timing = result?.timing,
+            months = result?.months ?: 0,
+        )
+    }
+
+    private companion object {
+        val MONTH_YEAR: DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM yyyy")
+    }
 }

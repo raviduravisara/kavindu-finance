@@ -25,6 +25,19 @@
     <string name="goal_finish_months_late">%1$s, %2$d months after your deadline</string>
     <string name="goal_finish_unknown">Your first estimate appears after one full pay cycle.</string>
 
+    <!-- "What if" card: a preview only, nothing is saved. -->
+    <string name="goal_what_if_title">What if</string>
+    <string name="goal_what_if_label">Save each cycle</string>
+    <!-- e.g. "You'd reach LKR 490,000 by July 2027, 3 months before your deadline." -->
+    <string name="goal_what_if_before_one">You\'d reach %1$s by %2$s, 1 month before your deadline.</string>
+    <string name="goal_what_if_before_many">You\'d reach %1$s by %2$s, %3$d months before your deadline.</string>
+    <string name="goal_what_if_in_month">You\'d reach %1$s by %2$s, in your deadline month.</string>
+    <string name="goal_what_if_after_one">You\'d reach %1$s by %2$s, 1 month after your deadline.</string>
+    <string name="goal_what_if_after_many">You\'d reach %1$s by %2$s, %3$d months after your deadline.</string>
+    <string name="goal_what_if_zero">Move the slider to see when you\'d reach %1$s.</string>
+    <string name="goal_what_if_pace">Your pace so far: %1$s a cycle</string>
+    <string name="goal_what_if_note">Just a preview. Nothing is saved.</string>
+
     <string name="goal_what_changed">What changed your date</string>
     <string name="goal_no_effects">Nothing has moved your date this cycle.</string>
     <string name="goal_effect_check_in">Weekly check-in</string>

@@ -36,6 +36,8 @@ data class GoalProgress(
     /** End of the cycle in which the goal is expected to be reached, or null if it cannot be estimated yet. */
     val projectedFinish: LocalDate?,
     val status: GoalStatus,
+    /** Average saved per completed cycle since the goal started; 0 before the first full cycle. Used by the what-if. */
+    val averagePerCycleCents: Long = 0,
 )
 
 /**
@@ -98,6 +100,7 @@ class GoalCalculator {
             toGoThisCycleCents = toGo,
             projectedFinish = projectedFinish,
             status = status,
+            averagePerCycleCents = averagePerCycle,
         )
     }
 
