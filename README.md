@@ -108,17 +108,11 @@ The repository already contains `app/google-services.json` for the team's Fireba
 
 ## Build and run
 
-**Requirements:** Android Studio (latest stable), an emulator or phone with Android 8.0 or newer, and a full JDK.
+**Requirements:** Android Studio (latest stable), an emulator or phone with Android 8.0 or newer, and an internet connection for the first build.
 
-**JDK:** the Gradle daemon runs on **Java 25** (set in `gradle/gradle-daemon-jvm.properties`). Point `JAVA_HOME` at Android Studio's bundled JDK (JBR):
+**Java:** Gradle runs on **Java 25** (`gradle/gradle-daemon-jvm.properties`). You don't need to install it: Gradle finds a full JDK 25 on your computer or downloads one by itself on the first build, on Windows and macOS alike. The app code itself compiles to Java 11.
 
-| Windows (PowerShell) | macOS |
-| --- | --- |
-| `$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"` | `export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"` |
-
-If the JBR is not Java 25, Gradle downloads a JDK 25 by itself on the first build, or you can install one (for example Temurin 25) and point `JAVA_HOME` there. On Linux, use the `jbr` folder inside your Android Studio installation.
-
-> Use a full JDK. A Java runtime without `jlink`, such as the one bundled with VS Code's Java extension, fails with "jlink executable ... does not exist". After changing `JAVA_HOME`, run `gradlew --stop` once so no old Gradle daemon is reused.
+> Make sure no Java 25 runtime **without `jlink`** is installed, such as the one bundled with VS Code's Java extension. Gradle may pick it and the build fails with "jlink executable ... does not exist". If that happens, remove that runtime (or install a full JDK 25, for example Temurin 25), then run `gradlew --stop` and build again.
 
 Then:
 
