@@ -23,7 +23,6 @@ import kotlinx.serialization.Serializable
 
 // Member 3: dashboard, expenses, categories, recurring
 @Serializable data object Dashboard
-@Serializable data object QuickAddExpense
 @Serializable data object TransactionHistory
 @Serializable data class EditExpense(val expenseId: String)
 @Serializable data object Categories

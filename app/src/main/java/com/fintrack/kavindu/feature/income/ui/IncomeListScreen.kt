@@ -108,7 +108,7 @@ private fun IncomeListContent(
         contentPadding = PaddingValues(start = Dimens.ScreenPadding, end = Dimens.ScreenPadding, top = 8.dp, bottom = 88.dp),
         verticalArrangement = Arrangement.spacedBy(Dimens.CardGap),
     ) {
-        item { ReceivedCard(uiState.totalReceived) }
+        item { ReceivedCard(uiState.totalReceived, uiState.cryptoProfit) }
         if (uiState.freelancePending != null || uiState.overdueInvoices > 0) {
             item { FreelanceCard(uiState.freelancePending, uiState.overdueInvoices, onFreelanceClicked) }
         }
@@ -123,10 +123,13 @@ private fun IncomeListContent(
 
 // Measured income, not his estimate: only money that has arrived counts.
 @Composable
-private fun ReceivedCard(total: String) {
+private fun ReceivedCard(total: String, cryptoProfit: String?) {
     HeroCard {
         Text(text = stringResource(R.string.income_received_label), style = MaterialTheme.typography.labelLarge)
         Text(text = total, style = MaterialTheme.typography.displaySmall)
+        if (cryptoProfit != null) {
+            Text(text = stringResource(R.string.income_received_crypto, cryptoProfit), style = MaterialTheme.typography.bodyMedium)
+        }
         Text(text = stringResource(R.string.income_received_help), style = MaterialTheme.typography.bodyMedium)
     }
 }
