@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Daily reminder (feature/reminder, and its card in Settings). Calm, never a guilt message. -->
+<resources>
+    <string name="reminder_title">Daily reminder</string>
+    <string name="reminder_description">A gentle nudge to note what you spent. It stays quiet on days you have already added an expense.</string>
+    <string name="reminder_time">Remind me at %1$s</string>
+    <string name="reminder_change_time">Change</string>
+    <string name="reminder_time_dialog_title">Reminder time</string>
+    <string name="reminder_time_confirm">Set time</string>
+    <string name="reminder_permission_note">Notifications are off for Kavindu Finance. To get the reminder, allow notifications in your phone\'s settings.</string>
+    <string name="reminder_channel_name">Daily reminder</string>
+    <string name="reminder_channel_description">One gentle reminder a day to add your spending.</string>
+    <string name="reminder_notification_title">Spent anything today?</string>
+    <string name="reminder_notification_text">Tap to add it. It only takes a few seconds.</string>
+</resources>
