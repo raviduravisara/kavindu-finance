@@ -56,6 +56,11 @@
     <string name="settings_save_failed">Could not save. Check your connection and try again.</string>
     <string name="settings_log_out_title">Log out?</string>
     <string name="settings_log_out_text">Your data stays safe in your account. Log in again any time to see it.</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_help">System follows your phone\'s setting.</string>
 
     <!-- Login, register and forgot password (feature/auth) -->
     <string name="auth_login_title">Welcome back</string>
