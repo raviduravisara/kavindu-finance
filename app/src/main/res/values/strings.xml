@@ -94,12 +94,4 @@
     <string name="nav_history">History</string>
     <string name="nav_goal">Goal</string>
     <string name="dashboard_title">This cycle</string>
-
-    <!-- Temporary placeholders until the real screens exist -->
-    <string name="placeholder_dashboard">The dashboard is coming soon.</string>
-    <string name="placeholder_dashboard_action">Start weekly check-in</string>
-    <string name="placeholder_income">Income is coming soon.</string>
-    <string name="placeholder_history">History is coming soon.</string>
-    <string name="placeholder_goal">Your savings goal is coming soon.</string>
-    <string name="placeholder_back_home">Back to Home</string>
 </resources>

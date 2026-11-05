@@ -2,10 +2,12 @@ package com.fintrack.kavindu.feature.income.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fintrack.kavindu.core.data.repository.CryptoRepository
 import com.fintrack.kavindu.core.data.repository.FreelanceRepository
 import com.fintrack.kavindu.core.data.repository.IncomeRepository
 import com.fintrack.kavindu.core.data.repository.ProfileRepository
 import com.fintrack.kavindu.core.model.AppError
+import com.fintrack.kavindu.core.model.CryptoTransfer
 import com.fintrack.kavindu.core.model.Currency
 import com.fintrack.kavindu.core.model.Income
 import com.fintrack.kavindu.core.model.IncomeSource
@@ -13,6 +15,7 @@ import com.fintrack.kavindu.core.model.Milestone
 import com.fintrack.kavindu.core.model.asAppError
 import com.fintrack.kavindu.core.util.Money
 import com.fintrack.kavindu.core.util.PayCycle
+import com.fintrack.kavindu.feature.crypto.viewmodel.CryptoCalculator
 import com.fintrack.kavindu.feature.freelance.viewmodel.FreelanceRules
 import com.fintrack.kavindu.feature.freelance.viewmodel.observeProjectsWithMilestones
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -49,13 +52,14 @@ data class IncomeListUiState(
     val isLoading: Boolean = true,
     val loadError: AppError? = null,
     val cycleLabel: String = "", // e.g. "25 Oct – 24 Nov"
-    val totalReceived: String = "",
+    val totalReceived: String = "", // income entries + crypto profit that became real this cycle, as on the dashboard
+    val cryptoProfit: String? = null, // e.g. "LKR 40,000"; null when no crypto profit became real this cycle
     val bySource: List<SourceTotal> = emptyList(), // only sources with income this cycle
     val rows: List<IncomeRow> = emptyList(),
     val freelancePending: String? = null, // e.g. "LKR 85,000": owed by clients, shown but not counted (FR-14)
     val overdueInvoices: Int = 0,
 ) {
-    val isEmpty: Boolean get() = rows.isEmpty()
+    val isEmpty: Boolean get() = rows.isEmpty() && cryptoProfit == null
 }
 
 /**
@@ -68,6 +72,7 @@ class IncomeListViewModel @Inject constructor(
     private val incomeRepository: IncomeRepository,
     private val profileRepository: ProfileRepository,
     private val freelanceRepository: FreelanceRepository,
+    private val cryptoRepository: CryptoRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(IncomeListUiState())
@@ -95,7 +100,8 @@ class IncomeListViewModel @Inject constructor(
                     combine(
                         incomeRepository.observeIncomes(cycle),
                         freelanceRepository.observeProjectsWithMilestones(),
-                    ) { incomes, projects -> buildState(cycle, incomes, projects.flatMap { it.second }) }
+                        cryptoRepository.observeTransfers(),
+                    ) { incomes, projects, transfers -> buildState(cycle, incomes, projects.flatMap { it.second }, transfers) }
                 }
                 .catch { error -> _uiState.update { it.copy(isLoading = false, loadError = error.asAppError()) } }
                 .collect { state -> _uiState.value = state }
@@ -104,15 +110,24 @@ class IncomeListViewModel @Inject constructor(
 
     fun onRetryClicked() = load()
 
-    private fun buildState(cycle: PayCycle, incomes: List<Income>, milestones: List<Milestone>): IncomeListUiState {
+    private fun buildState(
+        cycle: PayCycle,
+        incomes: List<Income>,
+        milestones: List<Milestone>,
+        transfers: List<CryptoTransfer>,
+    ): IncomeListUiState {
         val bySource = IncomeSource.entries.mapNotNull { source ->
             val total = incomes.filter { it.source == source }.sumOf { it.lkrAmountCents }
             if (total > 0) SourceTotal(source, Money.formatLkr(total)) else null
         }
+        // Crypto profit is calculated from the transfers, never saved as an income entry, so it is never counted twice.
+        // It is added here exactly as the dashboard's "Received" adds it, so both screens show the same total.
+        val cryptoProfit = CryptoCalculator.realisedBetween(CryptoCalculator.position(transfers), cycle.start, cycle.end)
         return IncomeListUiState(
             isLoading = false,
             cycleLabel = "${cycle.start.format(DAY_MONTH)} – ${cycle.end.format(DAY_MONTH)}",
-            totalReceived = Money.formatLkr(incomes.sumOf { it.lkrAmountCents }),
+            totalReceived = Money.formatLkr(incomes.sumOf { it.lkrAmountCents } + cryptoProfit),
+            cryptoProfit = if (cryptoProfit > 0) Money.formatLkr(cryptoProfit) else null,
             bySource = bySource,
             rows = incomes.map { it.toRow() },
             freelancePending = FreelanceRules.formatPending(FreelanceRules.pendingByCurrency(milestones)),

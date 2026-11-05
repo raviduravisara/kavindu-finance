@@ -7,6 +7,7 @@
 
     <string name="income_received_label">Received this cycle</string>
     <string name="income_received_help">Only money that has arrived. Pending invoices are not counted.</string>
+    <string name="income_received_crypto">Includes %1$s crypto profit that came back to your bank</string>
     <string name="income_by_source">By source</string>
     <string name="income_empty">Add the money you have received this cycle to see what you really earn.</string>
     <!-- e.g. "USD 50 at LKR 300 per USD" -->
