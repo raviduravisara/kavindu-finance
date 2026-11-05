@@ -1,12 +1,15 @@
 package com.fintrack.kavindu.feature.dashboard.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.fintrack.kavindu.core.model.AppError
 import com.fintrack.kavindu.core.model.asAppError
 import com.fintrack.kavindu.feature.dashboard.data.DashboardRepository
 import com.fintrack.kavindu.feature.expense.viewmodel.SaveOutcome
 import com.fintrack.kavindu.feature.recurring.data.RecurringEntryGenerator
+import com.fintrack.kavindu.navigation.Dashboard
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -39,6 +42,7 @@ data class DashboardUiState(
 class DashboardViewModel @Inject constructor(
     private val dashboardRepository: DashboardRepository,
     private val recurringEntryGenerator: RecurringEntryGenerator,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
@@ -47,8 +51,19 @@ class DashboardViewModel @Inject constructor(
     private var loadJob: Job? = null
 
     init {
+        openQuickAddIfAsked()
         load()
         addRecurringEntries()
+    }
+
+    // The home-screen widget's "Add expense" opens this screen as Dashboard(openQuickAdd = true): show the sheet
+    // once. The "handled" flag is saved, so a rotation or returning to this tab does not open it again.
+    private fun openQuickAddIfAsked() {
+        val asked = runCatching { savedStateHandle.toRoute<Dashboard>().openQuickAdd }.getOrDefault(false)
+        if (asked && savedStateHandle.get<Boolean>(KEY_QUICK_ADD_HANDLED) != true) {
+            savedStateHandle[KEY_QUICK_ADD_HANDLED] = true
+            _uiState.update { it.copy(isQuickAddVisible = true) }
+        }
     }
 
     private fun load() {
@@ -84,4 +99,8 @@ class DashboardViewModel @Inject constructor(
     fun onExpenseSaved(outcome: SaveOutcome) = _uiState.update { it.copy(isQuickAddVisible = false, savedOutcome = outcome) }
 
     fun onSavedMessageShown() = _uiState.update { it.copy(savedOutcome = null) }
+
+    private companion object {
+        const val KEY_QUICK_ADD_HANDLED = "quick_add_handled"
+    }
 }
