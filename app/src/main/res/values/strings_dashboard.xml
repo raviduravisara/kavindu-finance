@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Member 3: dashboard. Kept in its own file so it never conflicts with the shared strings.xml. -->
+<resources>
+    <!-- Top bar: "This cycle" is dashboard_title in strings.xml. e.g. "25 Oct – 24 Nov · 12 days left" -->
+    <string name="dashboard_subtitle_days">%1$s · %2$d days left</string>
+    <string name="dashboard_subtitle_one_day">%1$s · 1 day left</string>
+
+    <!-- Safe-to-spend hero card. Overspending is a calm negative number, never a warning. -->
+    <string name="dashboard_safe_label">Safe to spend this cycle</string>
+    <string name="dashboard_per_day">About %1$s a day for the next %2$d days</string>
+    <string name="dashboard_per_day_one">About %1$s for today, the last day of this cycle</string>
+    <string name="dashboard_over">You\'re %1$s over for this cycle</string>
+
+    <string name="dashboard_received">Received</string>
+    <string name="dashboard_pending">%1$s pending · not counted</string>
+    <string name="dashboard_spent">Spent</string>
+    <string name="dashboard_since">Since %1$s</string>
+
+    <string name="dashboard_where_it_went">Where it went</string>
+    <string name="dashboard_committed">Committed</string>
+    <string name="dashboard_discretionary">Discretionary</string>
+    <!-- e.g. "LKR 48,000 · 71%" -->
+    <string name="dashboard_legend_value">%1$s · %2$d%%</string>
+
+    <string name="dashboard_by_category">By category</string>
+    <string name="dashboard_slice_unrecorded">Unrecorded spending</string>
+    <string name="dashboard_slice_rest">Everything else</string>
+    <string name="dashboard_slice_other">Other</string>
+
+    <!-- Goal card -->
+    <string name="dashboard_goal_percent">%1$d%%</string>
+    <!-- e.g. "On track · LKR 14,900 left to save this cycle" -->
+    <string name="dashboard_goal_left">%1$s · %2$s left to save this cycle</string>
+    <string name="dashboard_goal_done">%1$s · this cycle\'s saving is done</string>
+
+    <string name="dashboard_overdue_one">1 invoice overdue</string>
+    <string name="dashboard_overdue_many">%1$d invoices overdue</string>
+    <string name="dashboard_subscriptions_one">1 subscription to review</string>
+    <string name="dashboard_subscriptions_many">%1$d subscriptions to review</string>
+
+    <string name="dashboard_first_expense">Add your first expense to see where your money goes</string>
+    <string name="dashboard_add_expense">Add expense</string>
+</resources>
