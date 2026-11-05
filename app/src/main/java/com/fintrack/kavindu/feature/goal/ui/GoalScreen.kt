@@ -19,6 +19,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -27,6 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.fintrack.kavindu.R
@@ -39,10 +42,12 @@ import com.fintrack.kavindu.core.ui.components.StandardCard
 import com.fintrack.kavindu.core.ui.components.messageRes
 import com.fintrack.kavindu.core.ui.theme.Dimens
 import com.fintrack.kavindu.feature.goal.domain.GoalStatus
+import com.fintrack.kavindu.feature.goal.domain.WhatIfTiming
 import com.fintrack.kavindu.feature.goal.viewmodel.EffectRow
 import com.fintrack.kavindu.feature.goal.viewmodel.FinishTiming
 import com.fintrack.kavindu.feature.goal.viewmodel.GoalDetails
 import com.fintrack.kavindu.feature.goal.viewmodel.GoalViewModel
+import com.fintrack.kavindu.feature.goal.viewmodel.WhatIfState
 
 /**
  * The Goal tab (M6), as in the "Savings goal" wireframe: saved so far, this cycle's target,
@@ -84,7 +89,14 @@ fun GoalScreen(
                 onAction = onEditGoalClicked,
                 modifier = Modifier.padding(innerPadding),
             )
-            else -> GoalContent(details, onEditGoalClicked, onSetNewGoalClicked, Modifier.padding(innerPadding))
+            else -> GoalContent(
+                details = details,
+                whatIf = uiState.whatIf,
+                onEditGoalClicked = onEditGoalClicked,
+                onSetNewGoalClicked = onSetNewGoalClicked,
+                onWhatIfAmountChanged = viewModel::onWhatIfAmountChanged,
+                modifier = Modifier.padding(innerPadding),
+            )
         }
     }
 }
@@ -92,8 +104,10 @@ fun GoalScreen(
 @Composable
 private fun GoalContent(
     details: GoalDetails,
+    whatIf: WhatIfState?,
     onEditGoalClicked: () -> Unit,
     onSetNewGoalClicked: () -> Unit,
+    onWhatIfAmountChanged: (Float) -> Unit,
     modifier: Modifier,
 ) {
     Column(
@@ -110,9 +124,46 @@ private fun GoalContent(
                 SavedSoFarCard(details)
                 CycleTiles(details)
                 ProjectedFinishCard(details)
+                if (whatIf != null) WhatIfCard(whatIf, onWhatIfAmountChanged)
             }
         }
         EffectsCard(details.effects)
+    }
+}
+
+// E1: "If I save LKR X each cycle, when do I reach it?" A preview only; nothing is saved.
+@Composable
+private fun WhatIfCard(whatIf: WhatIfState, onAmountChanged: (Float) -> Unit) {
+    val month = whatIf.finishMonth
+    val result = when {
+        month == null -> stringResource(R.string.goal_what_if_zero, whatIf.target)
+        whatIf.timing == WhatIfTiming.BEFORE_DEADLINE && whatIf.months == 1 ->
+            stringResource(R.string.goal_what_if_before_one, whatIf.target, month)
+        whatIf.timing == WhatIfTiming.BEFORE_DEADLINE ->
+            stringResource(R.string.goal_what_if_before_many, whatIf.target, month, whatIf.months)
+        whatIf.timing == WhatIfTiming.AFTER_DEADLINE && whatIf.months == 1 ->
+            stringResource(R.string.goal_what_if_after_one, whatIf.target, month)
+        whatIf.timing == WhatIfTiming.AFTER_DEADLINE ->
+            stringResource(R.string.goal_what_if_after_many, whatIf.target, month, whatIf.months)
+        else -> stringResource(R.string.goal_what_if_in_month, whatIf.target, month)
+    }
+    val sliderLabel = stringResource(R.string.goal_what_if_label)
+    StandardCard {
+        Text(text = stringResource(R.string.goal_what_if_title), style = MaterialTheme.typography.titleMedium)
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            TileLabel(sliderLabel)
+            Spacer(modifier = Modifier.weight(1f))
+            Text(text = whatIf.amount, style = MaterialTheme.typography.titleMedium)
+        }
+        Slider(
+            value = whatIf.sliderValue,
+            onValueChange = onAmountChanged,
+            valueRange = 0f..whatIf.sliderMax,
+            modifier = Modifier.semantics { contentDescription = sliderLabel },
+        )
+        Text(text = result, style = MaterialTheme.typography.bodyMedium)
+        if (whatIf.pace != null) TileDetail(stringResource(R.string.goal_what_if_pace, whatIf.pace))
+        TileDetail(stringResource(R.string.goal_what_if_note))
     }
 }
 

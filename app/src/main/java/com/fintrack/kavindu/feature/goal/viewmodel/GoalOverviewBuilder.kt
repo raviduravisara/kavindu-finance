@@ -12,6 +12,7 @@ import com.fintrack.kavindu.feature.goal.domain.GoalCalculator
 import com.fintrack.kavindu.feature.goal.domain.GoalImpactCalculator
 import com.fintrack.kavindu.feature.goal.domain.GoalInput
 import com.fintrack.kavindu.feature.goal.domain.GoalStatus
+import com.fintrack.kavindu.feature.goal.domain.WhatIfInput
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -49,6 +50,7 @@ data class GoalDetails(
     val monthsAfterDeadline: Int, // only meaningful for AFTER_DEADLINE
     val shortfall: String, // what is still missing, for the deadline-passed state
     val effects: List<EffectRow>,
+    val whatIfInput: WhatIfInput? = null, // raw numbers for the "What if" card; null once reached or past the deadline
 )
 
 /**
@@ -135,6 +137,18 @@ object GoalOverviewBuilder {
             monthsAfterDeadline = monthsAfter.coerceAtLeast(0),
             shortfall = Money.formatLkr(progress.remainingCents),
             effects = effects,
+            whatIfInput = if (progress.status == GoalStatus.REACHED || progress.status == GoalStatus.DEADLINE_PASSED) {
+                null
+            } else {
+                WhatIfInput(
+                    remainingCents = progress.remainingCents,
+                    neededThisCycleCents = progress.neededThisCycleCents,
+                    averagePerCycleCents = progress.averagePerCycleCents,
+                    today = today,
+                    cycleStartDay = startDay,
+                    deadline = goal.deadline,
+                )
+            },
         )
     }
 
