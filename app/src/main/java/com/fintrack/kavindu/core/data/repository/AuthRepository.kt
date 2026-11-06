@@ -11,6 +11,9 @@ interface AuthRepository {
 
     suspend fun login(email: String, password: String): Result<Unit>
 
+    /** Signs in with the Google ID token from Credential Manager. A first-time user gets a profile, as in [register]. */
+    suspend fun signInWithGoogle(idToken: String): Result<Unit>
+
     suspend fun sendPasswordReset(email: String): Result<Unit>
 
     /** Also clears Room, so the next user cannot see this user's data. */

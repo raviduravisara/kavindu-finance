@@ -92,6 +92,10 @@
     <string name="auth_error_no_network">No internet connection. Check your connection and try again.</string>
     <string name="auth_error_too_many_attempts">Too many attempts. Wait a few minutes and try again.</string>
     <string name="auth_error_unknown">Something went wrong. Please try again.</string>
+    <string name="auth_or">or</string>
+    <string name="auth_continue_google">Continue with Google</string>
+    <string name="auth_error_no_google_account">There\'s no Google account on this phone. Add one in your phone\'s settings, or use email.</string>
+    <string name="auth_error_google_failed">Google sign-in didn\'t finish. Try again, or use email.</string>
 
     <!-- App frame: bottom navigation bar and dashboard top bar (UI spec) -->
     <string name="nav_home">Home</string>

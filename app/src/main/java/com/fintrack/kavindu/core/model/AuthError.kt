@@ -11,6 +11,9 @@ enum class AuthError {
     EMAIL_IN_USE,
     NO_NETWORK,
     TOO_MANY_ATTEMPTS,
+    GOOGLE_CANCELLED, // he closed Google's account picker: not an error, never shown
+    NO_GOOGLE_ACCOUNT, // no Google account on this phone
+    GOOGLE_FAILED, // Google sign-in did not complete
     UNKNOWN,
 }
 

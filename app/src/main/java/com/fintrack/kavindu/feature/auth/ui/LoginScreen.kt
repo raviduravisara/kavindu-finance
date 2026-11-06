@@ -5,6 +5,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,12 +22,14 @@ fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current // the Activity: Google's account picker opens over it
     LoginContent(
         uiState = uiState,
         onEmailChange = viewModel::onEmailChange,
         onPasswordChange = viewModel::onPasswordChange,
         onPasswordVisibilityToggle = viewModel::onPasswordVisibilityToggle,
         onLoginClicked = viewModel::onLoginClicked,
+        onGoogleClicked = { viewModel.onGoogleClicked(context) },
         onForgotPasswordClicked = onForgotPasswordClicked,
         onCreateAccountClicked = onCreateAccountClicked,
     )
@@ -39,6 +42,7 @@ private fun LoginContent(
     onPasswordChange: (String) -> Unit,
     onPasswordVisibilityToggle: () -> Unit,
     onLoginClicked: () -> Unit,
+    onGoogleClicked: () -> Unit,
     onForgotPasswordClicked: () -> Unit,
     onCreateAccountClicked: () -> Unit,
 ) {
@@ -46,14 +50,14 @@ private fun LoginContent(
         title = stringResource(R.string.auth_login_title),
         subtitle = stringResource(R.string.auth_login_subtitle),
     ) {
-        EmailField(value = uiState.email, onValueChange = onEmailChange, enabled = !uiState.isLoading)
+        EmailField(value = uiState.email, onValueChange = onEmailChange, enabled = !uiState.isBusy)
         PasswordField(
             value = uiState.password,
             onValueChange = onPasswordChange,
             label = stringResource(R.string.auth_password),
             isVisible = uiState.isPasswordVisible,
             onVisibilityToggle = onPasswordVisibilityToggle,
-            enabled = !uiState.isLoading,
+            enabled = !uiState.isBusy,
             imeAction = ImeAction.Done,
             onDone = onLoginClicked,
         )
@@ -62,11 +66,14 @@ private fun LoginContent(
             text = stringResource(R.string.auth_log_in),
             isLoading = uiState.isLoading,
             onClick = onLoginClicked,
+            enabled = !uiState.isGoogleLoading,
         )
-        TextButton(onClick = onForgotPasswordClicked, enabled = !uiState.isLoading) {
+        OrDivider()
+        GoogleButton(isLoading = uiState.isGoogleLoading, enabled = !uiState.isLoading, onClick = onGoogleClicked)
+        TextButton(onClick = onForgotPasswordClicked, enabled = !uiState.isBusy) {
             Text(stringResource(R.string.auth_forgot_password))
         }
-        TextButton(onClick = onCreateAccountClicked, enabled = !uiState.isLoading) {
+        TextButton(onClick = onCreateAccountClicked, enabled = !uiState.isBusy) {
             Text(stringResource(R.string.auth_no_account))
         }
     }
@@ -82,6 +89,7 @@ private fun LoginPreview() {
             onPasswordChange = {},
             onPasswordVisibilityToggle = {},
             onLoginClicked = {},
+            onGoogleClicked = {},
             onForgotPasswordClicked = {},
             onCreateAccountClicked = {},
         )
