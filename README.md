@@ -8,21 +8,25 @@ SE3092 Assignment 01 · Kotlin · Jetpack Compose · Material 3 · MVVM · Fireb
 
 | Feature | Kavindu's problem it solves |
 | --- | --- |
-| Login and register (email and password) | His data must follow him to any phone and stay private. Firebase Authentication plus security rules mean only he can read his data. |
+| Login and register (email and password, or Continue with Google) | His data must follow him to any phone and stay private. Firebase Authentication plus security rules mean only he can read his data. Google sign-in uses Credential Manager, so he can be in with one tap and no password to remember. |
 | Add income in LKR, USD or USDT | He earns from four sources in three currencies and "cannot answer" what he earns. For USD and USDT he enters the LKR that reached his bank; the rate is worked out once and stored, so a later rate never changes past income. |
 | Quick-add expense (3 taps) | Every tracking attempt died because entry was too slow. Amount, category, Save, straight from the dashboard. The most-used categories come first, and the last channel and account are remembered. |
 | Committed vs discretionary categories | He has "no concept" of what share of his spending is rent and bills versus coffee and UberEats. Every category carries that flag, so the dashboard splits his spending in two. |
 | Recurring items and subscription review | His gym auto-debits from a secondary account and he forgot to cancel two subscriptions. Rent, gym and subscriptions are added each cycle for him, utilities as an estimate to confirm, and subscriptions not reviewed for 60 days get a gentle nudge. |
 | Savings goal | The MacBook goal was "emotionally present and financially invisible". The goal screen shows saved so far, needed this cycle, the projected finish date, and what moved that date. |
 | Goal impact message | Daily spending never felt connected to the goal. After each discretionary expense he sees how many days it moves his goal date, for example "UberEats LKR 2,500 ≈ 2 days later". |
+| Goal what-if | He wants to know what it would take to get the MacBook sooner. A slider ("save LKR X each cycle") shows the month he would reach the goal and how far that is before or after his deadline. It starts at his real saving pace and changes nothing in his data. |
 | Safe to spend | He needs one number he can act on. Income minus committed and discretionary spending minus this cycle's goal saving, shown as a total and as a per-day amount for the days left. |
 | Dashboard with live updates and category chart | He has never seen where his money goes. One screen shows this cycle's income, spending, the two-bucket split, a category chart and goal progress, updating the moment anything is saved. |
-| Transaction history | He once found LKR 24,000 of coffee and dining only by reading three months of statements. Every entry can be seen, edited or deleted, grouped by date. |
+| Transaction history with search and filters | He once found LKR 24,000 of coffee and dining only by reading three months of statements. Every entry can be seen, edited or deleted, grouped by date. He can search by note, category, channel, account or amount, filter to income, expenses, committed, discretionary or unrecorded spending, and search across all pay cycles; the totals follow the filters. |
 | Pay-cycle setting | His salary arrives on the 25th, so a calendar month is the wrong unit. "My month starts on day …" (default 25, limited to 1–28) drives every total in the app. |
 | Freelance projects (Pending → Received) | He twice forgot to follow up on invoices and could not match payments to projects. Milestones show overdue invoices on the dashboard, and marking one received creates the linked income entry. |
 | Crypto card | He has no running net position after a Q1 gain and a Q3 loss. Money moved into and out of Binance gives his net position and realised profit, which is calculated and never saved as income, so it is never counted twice. |
 | Weekly balance check | Cash, PickMe rides and the secondary account never reach any record. Once a week he enters his bank balance and wallet cash; any gap becomes one honest "unrecorded spending" entry instead of a broken total. |
 | Home-screen widget | Opening the app is the step he skips. A 4×1 widget shows "Safe to spend today" and an **Add expense** button that opens quick-add directly. |
+| Daily reminder | His tracking habit faded within two weeks every time. An optional notification at a time he chooses ("Spent anything today? Tap to add it.") opens quick-add. It stays quiet on days he has already added an expense, so it never nags. |
+| CSV export | He wants his data in a spreadsheet too. Settings → Export to CSV saves all income and expenses through Android's own "Save as" screen, with exact amounts, the saved exchange rates and "unrecorded spending" labels. |
+| Appearance (System, Light, Dark) | He may prefer one look regardless of the phone's setting. The whole app switches straight away, using the app's own light and dark colour schemes. |
 
 ## Tech stack
 
@@ -31,14 +35,16 @@ SE3092 Assignment 01 · Kotlin · Jetpack Compose · Material 3 · MVVM · Fireb
 | Language | Kotlin 2.4.21 (100% Kotlin, no Java files) |
 | Build | Android Gradle Plugin 9.4.1, Gradle 9.6.0, Gradle Kotlin DSL, version catalog (`gradle/libs.versions.toml`) |
 | Code generation | KSP 2.3.12 (no kapt) |
-| UI | Jetpack Compose, Compose BOM 2026.02.01, Material 3, Material Icons Extended. Our own light and dark colour schemes, no dynamic colour. |
+| UI | Jetpack Compose, Compose BOM 2026.02.01, Material 3, Material Icons Extended. Our own light and dark colour schemes, no dynamic colour; the user chooses System, Light or Dark. |
 | Navigation | Navigation Compose 2.10.2, single activity, type-safe `@Serializable` routes |
 | Dependency injection | Hilt 2.60.1, hilt-navigation-compose 1.4.0 |
 | Cloud | Firebase BoM 35.0.2: Firebase Authentication and Cloud Firestore (source of truth). google-services plugin 4.5.0 |
+| Google sign-in | Credential Manager: androidx.credentials and credentials-play-services-auth 1.5.0, googleid 1.1.1 |
 | Local database | Room 2.8.5 (offline mirror the screens read from) |
 | Async | Kotlin coroutines and `StateFlow`; kotlinx-coroutines-play-services 1.11.0 for `.await()` on Firebase tasks |
 | Widget | Jetpack Glance 1.2.0 (glance-appwidget, glance-material3) |
-| Tests | JUnit 4.13.2: unit tests for every money, date, goal and rule calculation |
+| Background work | WorkManager 2.10.1, for the daily reminder only |
+| Tests | JUnit 4.13.2: 217 unit tests for the money, date, goal, reminder, export, filter and rule calculations |
 | Android versions | minSdk 26 (Android 8.0), targetSdk 37, compileSdk 37 |
 
 ## Architecture
@@ -70,6 +76,7 @@ Design rules the code follows:
 - **Money is `Long` cents**, never `Double` (LKR 1,250.50 = `125050`), so totals never drift.
 - **The month is a pay cycle** (25th to 24th by default), not a calendar month.
 - **All calculations run on the phone** in plain Kotlin classes with unit tests. There are no Cloud Functions, so the project stays on the free Spark plan.
+- **Phone settings stay on the phone.** The daily reminder time and the Appearance choice are saved in `SharedPreferences`, not Firestore, because a notification and the app's look belong to the device, not to the account. Logout turns the reminder off.
 - Every screen has loading, error (with retry) and empty states, using the shared components in `core/ui/components`.
 
 ### Firestore data
@@ -94,7 +101,7 @@ The repository already contains `app/google-services.json` for the team's Fireba
 
    Copy the `SHA1` line from the `Variant: debug` block and from the `Variant: release` block. The release one only appears once release signing is set up (see [Release APK](#release-apk)). Add both in **Project settings → Your apps → Add fingerprint**.
 4. Download the app's `google-services.json` and put it in the `app/` folder, replacing the existing one.
-5. In **Authentication → Sign-in method**, enable **Email/Password**.
+5. In **Authentication → Sign-in method**, enable **Email/Password** and **Google**. Google sign-in only works on builds whose SHA-1 was added in step 3, so add the release SHA-1 before testing the release APK.
 6. In **Firestore Database**, create a database in production mode, location **`asia-south1` (Mumbai)**.
 7. Deploy the security rules and indexes from the repository with the [Firebase CLI](https://firebase.google.com/docs/cli):
 
@@ -165,7 +172,8 @@ KavinduFinance/
 │       │   ├── ui/                 theme and shared components
 │       │   └── util/               Money and PayCycle
 │       ├── feature/                auth, settings, balancecheck, income, freelance, crypto, goal,
-│       │                           expense, recurring, dashboard, widget (each with ui/, viewmodel/, data/)
+│       │                           expense, recurring, dashboard, widget, reminder
+│       │                           (each with ui/, viewmodel/, data/)
 │       └── navigation/             type-safe routes and the navigation graph
 ├── docs/                           architecture diagram
 ├── firestore.rules                 security rules
@@ -178,6 +186,6 @@ KavinduFinance/
 
 | Member | Role |
 | --- | --- |
-| Member 1: Ravidu Ravisara | Foundation (project setup, architecture, Room and Firestore sync, security rules, shared components and theme), login, register and forgot password, settings and pay cycle, weekly balance check |
+| Member 1: Ravidu Ravisara | Foundation (project setup, architecture, Room and Firestore sync, security rules, shared components and theme), login, register and forgot password, Google sign-in, settings and pay cycle, weekly balance check, home-screen widget, daily reminder, CSV export, appearance setting, history search and filters, goal what-if |
 | Member 2: Pinithi Ransara | Income in several currencies, freelance projects, crypto, savings goal |
 | Member 3: Sahan Jayathilake | Expenses (quick-add, categories, transaction history), recurring items, dashboard |
