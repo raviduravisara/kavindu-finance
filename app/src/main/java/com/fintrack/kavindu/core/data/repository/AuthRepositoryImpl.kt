@@ -1,5 +1,8 @@
 package com.fintrack.kavindu.core.data.repository
 
+import android.content.Context
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
 import com.fintrack.kavindu.core.data.local.AppDatabase
 import com.fintrack.kavindu.core.data.remote.FirestorePaths
 import com.fintrack.kavindu.core.data.remote.FirestoreSync
@@ -15,8 +18,10 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +34,7 @@ import javax.inject.Singleton
 
 @Singleton
 class AuthRepositoryImpl @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
     private val database: AppDatabase,
@@ -57,6 +63,14 @@ class AuthRepositoryImpl @Inject constructor(
         finishSignIn(user.uid, user.email ?: email)
     }
 
+    // Firebase checks the token with Google. The same account (same uid, same data) is used every time.
+    override suspend fun signInWithGoogle(idToken: String): Result<Unit> = runAuthCall {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        val user = auth.signInWithCredential(credential).await().user
+            ?: throw AuthException(AuthError.GOOGLE_FAILED)
+        finishSignIn(user.uid, user.email ?: throw AuthException(AuthError.GOOGLE_FAILED))
+    }
+
     override suspend fun sendPasswordReset(email: String): Result<Unit> = runAuthCall {
         auth.sendPasswordResetEmail(email).await()
     }
@@ -67,6 +81,14 @@ class AuthRepositoryImpl @Inject constructor(
         _currentUserId.value = null
         // Room holds a copy of this user's data; clear it so the next user cannot see it.
         withContext(Dispatchers.IO) { database.clearAllTables() }
+        // Forget the Google account chosen last time, so the account picker shows again on the next sign-in.
+        try {
+            CredentialManager.create(context).clearCredentialState(ClearCredentialStateRequest())
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // Nothing to clear (for example an email user, or no Google Play services): logout still completes.
+        }
     }
 
     // The profile is created on first register. Login checks again, in case that first write failed.

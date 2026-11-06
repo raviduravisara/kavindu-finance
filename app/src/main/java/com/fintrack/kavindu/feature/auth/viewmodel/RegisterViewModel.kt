@@ -1,5 +1,6 @@
 package com.fintrack.kavindu.feature.auth.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fintrack.kavindu.core.data.repository.AuthRepository
@@ -19,12 +20,17 @@ data class RegisterUiState(
     val confirmPassword: String = "",
     val isPasswordVisible: Boolean = false,
     val isLoading: Boolean = false,
+    val isGoogleLoading: Boolean = false,
     val error: AuthError? = null,
-)
+) {
+    /** While either sign-in runs, the form and both buttons are disabled. */
+    val isBusy: Boolean get() = isLoading || isGoogleLoading
+}
 
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val googleSignIn: GoogleSignIn,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegisterUiState())
@@ -39,9 +45,19 @@ class RegisterViewModel @Inject constructor(
 
     fun onPasswordVisibilityToggle() = _uiState.update { it.copy(isPasswordVisible = !it.isPasswordVisible) }
 
+    /** A first-time Google user gets a profile and the starter categories, exactly like an email sign-up. */
+    fun onGoogleClicked(activityContext: Context) {
+        if (_uiState.value.isBusy) return
+        _uiState.update { it.copy(isGoogleLoading = true, error = null) }
+        viewModelScope.launch {
+            val error = googleSignIn.signIn(activityContext)
+            _uiState.update { it.copy(isGoogleLoading = false, error = error) }
+        }
+    }
+
     fun onRegisterClicked() {
         val state = _uiState.value
-        if (state.isLoading) return
+        if (state.isBusy) return
 
         val invalid = AuthValidator.validateRegister(state.email, state.password, state.confirmPassword)
         if (invalid != null) {

@@ -5,6 +5,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
@@ -20,6 +21,7 @@ fun RegisterScreen(
     viewModel: RegisterViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current // the Activity: Google's account picker opens over it
     RegisterContent(
         uiState = uiState,
         onEmailChange = viewModel::onEmailChange,
@@ -27,6 +29,7 @@ fun RegisterScreen(
         onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
         onPasswordVisibilityToggle = viewModel::onPasswordVisibilityToggle,
         onRegisterClicked = viewModel::onRegisterClicked,
+        onGoogleClicked = { viewModel.onGoogleClicked(context) },
         onLogInClicked = onLogInClicked,
     )
 }
@@ -39,6 +42,7 @@ private fun RegisterContent(
     onConfirmPasswordChange: (String) -> Unit,
     onPasswordVisibilityToggle: () -> Unit,
     onRegisterClicked: () -> Unit,
+    onGoogleClicked: () -> Unit,
     onLogInClicked: () -> Unit,
 ) {
     AuthFormColumn(
@@ -46,14 +50,14 @@ private fun RegisterContent(
         subtitle = stringResource(R.string.auth_register_subtitle),
         onBackClicked = onLogInClicked,
     ) {
-        EmailField(value = uiState.email, onValueChange = onEmailChange, enabled = !uiState.isLoading)
+        EmailField(value = uiState.email, onValueChange = onEmailChange, enabled = !uiState.isBusy)
         PasswordField(
             value = uiState.password,
             onValueChange = onPasswordChange,
             label = stringResource(R.string.auth_password),
             isVisible = uiState.isPasswordVisible,
             onVisibilityToggle = onPasswordVisibilityToggle,
-            enabled = !uiState.isLoading,
+            enabled = !uiState.isBusy,
             imeAction = ImeAction.Next,
         )
         PasswordField(
@@ -62,7 +66,7 @@ private fun RegisterContent(
             label = stringResource(R.string.auth_confirm_password),
             isVisible = uiState.isPasswordVisible,
             onVisibilityToggle = onPasswordVisibilityToggle,
-            enabled = !uiState.isLoading,
+            enabled = !uiState.isBusy,
             imeAction = ImeAction.Done,
             onDone = onRegisterClicked,
         )
@@ -71,8 +75,11 @@ private fun RegisterContent(
             text = stringResource(R.string.auth_create_account),
             isLoading = uiState.isLoading,
             onClick = onRegisterClicked,
+            enabled = !uiState.isGoogleLoading,
         )
-        TextButton(onClick = onLogInClicked, enabled = !uiState.isLoading) {
+        OrDivider()
+        GoogleButton(isLoading = uiState.isGoogleLoading, enabled = !uiState.isLoading, onClick = onGoogleClicked)
+        TextButton(onClick = onLogInClicked, enabled = !uiState.isBusy) {
             Text(stringResource(R.string.auth_have_account))
         }
     }
@@ -89,6 +96,7 @@ private fun RegisterPreview() {
             onConfirmPasswordChange = {},
             onPasswordVisibilityToggle = {},
             onRegisterClicked = {},
+            onGoogleClicked = {},
             onLogInClicked = {},
         )
     }

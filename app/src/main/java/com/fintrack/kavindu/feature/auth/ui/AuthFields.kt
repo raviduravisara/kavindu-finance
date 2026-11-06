@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -18,13 +19,16 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -149,8 +153,8 @@ fun AuthErrorText(error: AuthError?) {
 }
 
 @Composable
-fun AuthButton(text: String, isLoading: Boolean, onClick: () -> Unit) {
-    Button(onClick = onClick, enabled = !isLoading, modifier = Modifier.fillMaxWidth()) {
+fun AuthButton(text: String, isLoading: Boolean, onClick: () -> Unit, enabled: Boolean = true) {
+    Button(onClick = onClick, enabled = enabled && !isLoading, modifier = Modifier.fillMaxWidth()) {
         if (isLoading) {
             CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
         } else {
@@ -159,9 +163,37 @@ fun AuthButton(text: String, isLoading: Boolean, onClick: () -> Unit) {
     }
 }
 
-// Problems with what the user typed. No internet, too many attempts and unknown errors are not.
+/** A thin line with "or" in the middle, between the email form and "Continue with Google". */
+@Composable
+fun OrDivider() {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
+        Text(
+            text = stringResource(R.string.auth_or),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 12.dp),
+        )
+        HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
+    }
+}
+
+/** "Continue with Google": the secondary, outlined button. Text only, so no Google logo file is copied in. */
+@Composable
+fun GoogleButton(isLoading: Boolean, enabled: Boolean, onClick: () -> Unit) {
+    OutlinedButton(onClick = onClick, enabled = enabled && !isLoading, modifier = Modifier.fillMaxWidth()) {
+        if (isLoading) {
+            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+        } else {
+            Text(stringResource(R.string.auth_continue_google))
+        }
+    }
+}
+
+// Problems with what the user typed. No internet, too many attempts, Google and unknown errors are not.
 private fun AuthError.isValidationError(): Boolean = when (this) {
-    AuthError.NO_NETWORK, AuthError.TOO_MANY_ATTEMPTS, AuthError.UNKNOWN -> false
+    AuthError.NO_NETWORK, AuthError.TOO_MANY_ATTEMPTS, AuthError.UNKNOWN,
+    AuthError.GOOGLE_CANCELLED, AuthError.NO_GOOGLE_ACCOUNT, AuthError.GOOGLE_FAILED -> false
     else -> true
 }
 
@@ -176,5 +208,7 @@ fun AuthError.messageRes(): Int = when (this) {
     AuthError.EMAIL_IN_USE -> R.string.auth_error_email_in_use
     AuthError.NO_NETWORK -> R.string.auth_error_no_network
     AuthError.TOO_MANY_ATTEMPTS -> R.string.auth_error_too_many_attempts
+    AuthError.NO_GOOGLE_ACCOUNT -> R.string.auth_error_no_google_account
+    AuthError.GOOGLE_FAILED, AuthError.GOOGLE_CANCELLED -> R.string.auth_error_google_failed
     AuthError.UNKNOWN -> R.string.auth_error_unknown
 }
